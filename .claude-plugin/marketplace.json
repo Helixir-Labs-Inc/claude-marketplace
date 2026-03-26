@@ -1,0 +1,31 @@
+{
+  "name": "helixir-labs-inc",
+  "owner": {
+    "name": "Helixir Labs Inc.",
+    "url": "https://github.com/Helixir-Labs-Inc"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by Helixir Labs. Agent-native productivity tools.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "personal-knowledge-assistant",
+      "description": "Agent-native PKM with interactive setup, ADHD-friendly planning (top-3 batching), inbox triage, daily/weekly reviews, and domain-based organization. Includes 6 skills and 2 agents.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Aric Crosson Bouwers",
+        "url": "https://github.com/ariccb"
+      },
+      "tags": [
+        "claude-code",
+        "plugin",
+        "pkm",
+        "productivity",
+        "adhd",
+        "knowledge-management"
+      ],
+      "source": "./plugins/personal-knowledge-assistant"
+    }
+  ]
+}
