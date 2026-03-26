@@ -13,9 +13,7 @@ Read the CLAUDE.md in the PKA root for:
 ## Step 1: Scan All Inboxes
 
 Check these locations for files:
-- `<pka-root>/inbox/personal/`
-- `<pka-root>/inbox/helixir/` (or whatever domains exist)
-- `<pka-root>/inbox/webvar/` (or whatever domains exist)
+- `<pka-root>/inbox/<domain>/` for each domain listed in CLAUDE.md
 - `~/Downloads/` — only files modified in the last 24 hours
 
 List what's found. If nothing: "All inboxes clear." and stop.
@@ -42,9 +40,9 @@ Show the triage plan BEFORE executing:
 
 | File | → New Name | → Destination | Tags |
 |------|-----------|---------------|------|
-| receipt.pdf | 2026-03-26_receipt_pharmacy_rx_45.50.pdf | ~/Documents/Personal/finance/ | Medical, Tax Claimable |
-| screenshot.png | 2026-03-26_screenshot_webvar_dashboard.png | ~/Documents/Webvar/projects/ | |
-| invoice.pdf | 2026-03-26_invoice_client_march.pdf | Google Drive: Helixir Labs/finance/ | Corporate Expense |
+| receipt.pdf | 2026-03-26_receipt_pharmacy_rx_45.50.pdf | <personal-files>/finance/ | Medical, Tax Claimable |
+| screenshot.png | 2026-03-26_screenshot_<work-domain>_dashboard.png | <work-files>/projects/ | |
+| invoice.pdf | 2026-03-26_invoice_client_march.pdf | <company-files>/finance/ | Corporate Expense |
 
 Proceed? (yes/no/edit)
 ```
@@ -62,8 +60,8 @@ On confirmation:
 ```
 Triaged X files:
 - X → personal/finance/
-- X → helixir/finance/
-- X → webvar/projects/
+- X → <domain>/finance/
+- X → <domain>/projects/
 - X skipped (need clarification)
 ```
 

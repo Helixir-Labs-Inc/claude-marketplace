@@ -80,5 +80,5 @@ Include the full review content so it's searchable later.
 ## Tone
 - Zoom out. This is about trajectory, not daily tasks.
 - Celebrate momentum: "Third week in a row hitting learning goals."
-- Flag drift: "Webvar project stalled — blocked on API access since Tuesday."
+- Flag drift: "Work project stalled — blocked on API access since Tuesday."
 - End with energy for next week, not exhaustion from this one.
