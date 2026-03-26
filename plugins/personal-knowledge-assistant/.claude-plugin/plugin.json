@@ -1,0 +1,19 @@
+{
+  "name": "personal-knowledge-assistant",
+  "version": "0.1.0",
+  "description": "Agent-native PKM with interactive setup, ADHD-friendly planning (top-3 batching), inbox triage, daily/weekly reviews, and domain-based organization. Includes 6 skills and 2 agents.",
+  "author": {
+    "name": "Aric Crosson Bouwers",
+    "url": "https://github.com/ariccb"
+  },
+  "repository": "https://github.com/Helixir-Labs-Inc/claude-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "pkm",
+    "productivity",
+    "adhd",
+    "knowledge-management",
+    "inbox-triage",
+    "planning"
+  ]
+}
