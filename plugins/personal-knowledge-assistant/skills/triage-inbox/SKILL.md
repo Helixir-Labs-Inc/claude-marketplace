@@ -55,6 +55,24 @@ On confirmation:
 3. Apply Finder tags: `tag -a "Tag Name" "file path"`
 4. If the file warrants a PKM note (contract, important receipt), offer to create one in the appropriate domain
 
+### Folder density check
+
+After moving files, count the items in each destination folder. If a folder has **more than 15 files**, suggest organizing with year subfolders (`YYYY/`) or category subfolders — whichever makes more sense for the content type:
+
+- **Receipts, invoices, statements, tax docs** → year subfolders: `finance/2026/`, `finance/2025/`
+- **Contracts, legal docs** → year subfolders: `legal/2026/`
+- **Career docs** → type subfolders if mixed: `career/employment/`, `career/certifications/`, `career/resumes/`
+- **Projects** → already scoped by project folder, no action needed
+
+Present the reorganization as a suggestion, not an automatic action. Example:
+```
+📁 personal/finance/ has 23 files — want me to organize into year subfolders?
+   finance/2025/ (8 files)
+   finance/2026/ (15 files)
+```
+
+Only suggest once per folder per session. If the user declines, don't ask again.
+
 ## Step 5: Report
 
 ```
