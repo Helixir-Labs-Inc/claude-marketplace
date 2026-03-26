@@ -1,0 +1,7 @@
+{
+  "name": "personal-knowledge-assistant",
+  "version": "0.1.0",
+  "description": "Agent-native personal knowledge management. Interactive setup, ADHD-friendly planning, inbox triage, domain-based organization, and scheduled reviews.",
+  "skills": ["skills/*"],
+  "agents": ["agents/*"]
+}
