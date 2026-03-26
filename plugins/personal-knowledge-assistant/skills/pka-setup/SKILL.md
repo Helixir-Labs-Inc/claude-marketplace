@@ -165,7 +165,7 @@ On confirmation, create the full structure:
    - For personal: health.md, finance.md, family.md, learning/, career/, journal/, notes/, projects/, meetings/
    - For work domains: notes/, projects/, meetings/, plus any sub-areas they specified
    - Area docs (`.md` at domain root) include a `Files:` reference to the storage mirror path
-4. **Create inbox folders** (gitignored): inbox/personal/, inbox/[domain]/, etc.
+4. **Create inbox folders** (gitignored): inbox/inbox-personal/, inbox/inbox-[domain]/, etc.
 5. **Create shared folders**: templates/, meta/
 6. **Write CLAUDE.md** with (include ONLY enabled integrations):
    - Domain structure and routing rules

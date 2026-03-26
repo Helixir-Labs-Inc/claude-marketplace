@@ -13,7 +13,7 @@ Read the CLAUDE.md in the PKA root for:
 ## Step 1: Scan All Inboxes
 
 Check these locations for files:
-- `<pka-root>/inbox/<domain>/` for each domain listed in CLAUDE.md
+- `<pka-root>/inbox/inbox-<domain>/` for each domain listed in CLAUDE.md
 - `~/Downloads/` — only files modified in the last 24 hours
 
 List what's found. If nothing: "All inboxes clear." and stop.
