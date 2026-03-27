@@ -1,76 +1,46 @@
 ---
-description: Set up Helixir ralph workflow — installs flow-next, gstack, and patches ralph templates with lead coordinator pattern, parallel subagent workers, full quality pipeline, and integration testing. Use when starting a new project, setting up a new machine, or after flow-next updates.
+description: Create a ralph script for a specific flow-next epic. Each epic gets its own isolated directory (scripts/ralph-<epic-slug>/) with its own config, templates, and run state — multiple can run in parallel. Use when starting work on a new epic.
 ---
 
-# Helixir Ralph Script Setup
+# Setup Ralph Script
 
-This is a single command that handles everything:
-1. Verifies flow-next plugin is installed (tells you how to install if not)
-2. Installs gstack skills if missing (as real copies, not symlinks)
-3. Ensures all skills are real copies (converts any symlinks)
-4. Scaffolds ralph via flow-next if the project doesn't have it yet
-5. Patches the default ralph templates with the Helixir coordinator workflow
-6. Ensures config.env has APP_TYPE and FEATURE_BRANCH_PREFIX fields
+Creates an epic-specific ralph directory at `scripts/ralph-<epic-slug>/` with:
+- Patched prompt templates (lead coordinator + parallel workers)
+- Pre-filled config.env with the epic slug and app type
+- Its own runs/ directory for isolated state
 
-Run it:
+Multiple ralph scripts can run in parallel since each has its own directory.
+
+## Usage
+
+The skill needs the epic slug. Pass it as an argument:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh
+${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-script.sh <epic-slug> [project-dir] [app-type]
 ```
 
-After setup, configure your epic in `scripts/ralph/config.env`:
+Examples:
+
 ```bash
-EPICS=fn-1-your-epic-slug
-APP_TYPE=native   # or "web"
+# Web app epic (default)
+${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-script.sh fn-10-note-editor-redesign
+
+# Native iOS/macOS app
+${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-script.sh fn-10-note-editor-redesign . native
+
+# Different project directory
+${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-script.sh fn-5-auth-flow /path/to/project web
 ```
 
-Then start the ralph loop:
+After setup:
 ```bash
-scripts/ralph/ralph.sh
+scripts/ralph-fn-10-note-editor-redesign/ralph.sh
 ```
-
-## What this patches
-
-The default flow-next ralph templates are replaced with a lead coordinator architecture:
-
-### Per-task workflow (prompt_work.md)
-
-The lead coordinator pattern:
-- **Parallel task detection**: Reads all ready tasks, spawns Agent workers in worktrees for parallelizable work
-- **Full quality pipeline per task**: /review -> /investigate (if bugs) -> /design-review -> /ui-verify-xcode (native) -> /qa
-- **Always pushes**: Every commit gets pushed to origin (fixes the unpushed worktree commit bug)
-- **Worker merge**: Parallel worker branches merged back into the feature branch
-- **Receipt after quality gates**: Impl receipt written AFTER all quality gates pass
-
-### Epic completion (prompt_completion.md)
-
-The integration testing + shipping pipeline:
-- **Two-pass task validation**: Cheap triage then deep-check suspects
-- **Integration testing**: /browse (web) or /ui-verify-xcode (native) tests ALL features from the epic
-- **Fix loop**: Finds issues -> spawns fix agents -> retests until clean
-- **Security**: /cso full security audit
-- **Documentation**: /document-release updates all docs
-- **Codex review**: /codex second opinion on complete PR diff
-- **Full PR review**: Dedicated agent reviews entire feature branch diff
-- **Ship**: /ship creates PR against main
-
-### Quality gate skills used
-
-| Skill | When | Purpose |
-|-------|------|---------|
-| `/review` | Per task | Staff engineer code review |
-| `/investigate` | When bugs suspected | Root cause analysis |
-| `/design-review` | Per task | Visual design audit |
-| `/ui-verify-xcode` | Per task (native) | iOS + macOS screenshot verification |
-| `/qa` | Per task (web) | Systematic QA testing |
-| `/browse` | Epic completion (web) | Integration testing |
-| `/cso` | Epic completion | Security audit |
-| `/document-release` | Epic completion | Documentation update |
-| `/codex` | Epic completion | Final diff review |
-| `/ship` | Epic completion | Create PR against main |
 
 ## Prerequisites
 
-- **flow-next**: Claude Code plugin (marketplace: gmickel/flow-next)
-- **gstack**: Quality gate skills (https://github.com/garrytan/gstack)
-- Both must be installed as real file copies in `~/.claude/skills/`, NOT symlinks
+Run `/helixir:init-agent-skills` first if you haven't installed flow-next and gstack yet.
+
+## Re-running
+
+Safe to re-run on an existing directory — it re-patches templates and updates config without losing run state.

@@ -1,6 +1,6 @@
 {
   "name": "helixir-ralph-workflow",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Lead coordinator ralph workflow with parallel subagent teams, full quality pipeline (review, investigate, design-review, ui-verify-xcode, qa), integration testing, security audit, and PR shipping via gstack skills.",
   "skills": ["skills/*"]
 }
