@@ -26,6 +26,23 @@
         "knowledge-management"
       ],
       "source": "./plugins/personal-knowledge-assistant"
+    },
+    {
+      "name": "helixir-ralph-workflow",
+      "description": "Coordinated ralph workflow integrating flow-next task management with gstack quality gates. Patches default ralph templates for receipt-gated quality checks, two-pass task validation, and design review integration.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Aric Crosson Bouwers",
+        "url": "https://github.com/ariccb"
+      },
+      "tags": [
+        "claude-code",
+        "plugin",
+        "ralph",
+        "workflow",
+        "quality-gates"
+      ],
+      "source": "./plugins/helixir-ralph-workflow"
     }
   ]
 }
