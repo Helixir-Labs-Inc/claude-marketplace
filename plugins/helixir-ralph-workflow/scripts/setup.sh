@@ -140,12 +140,12 @@ else
 fi
 
 # 5. Patch templates
-info "Patching ralph templates with Helixir workflow..."
+info "Patching ralph templates with Helixir coordinator workflow..."
 cp "$TEMPLATES_DIR/prompt_work.md" "$PROJECT_DIR/scripts/ralph/prompt_work.md"
-ok "Patched prompt_work.md (receipt-gated quality gates, gstack integration)"
+ok "Patched prompt_work.md (lead coordinator + parallel workers + full quality pipeline)"
 
 cp "$TEMPLATES_DIR/prompt_completion.md" "$PROJECT_DIR/scripts/ralph/prompt_completion.md"
-ok "Patched prompt_completion.md (two-pass validation sweep, deferred UI verification)"
+ok "Patched prompt_completion.md (integration testing + CSO + docs + codex + PR review + ship)"
 
 # 6. Patch ralph.sh rate limit handling (remove broken Codex fallback if present)
 info "Checking ralph.sh rate limit handling..."
@@ -154,28 +154,64 @@ if grep -q "codex --approval-mode" "$PROJECT_DIR/scripts/ralph/ralph.sh" 2>/dev/
   echo "  The Codex fallback used outdated CLI syntax and a dumbed-down prompt."
   echo "  It skipped quality gates and could duplicate already-committed work."
   echo "  Manual fix recommended: replace the Codex fallback block with wait-and-retry."
-  echo "  See: https://github.com/ariccb/helixir-ralph-workflow#rate-limit-handling"
 else
   ok "ralph.sh rate limit handling looks correct"
 fi
 
-# 7. Show config reminder
-if [[ ! -f "$PROJECT_DIR/scripts/ralph/config.env" ]]; then
-  warn "No config.env found. Copy the example:"
-  echo "  cp $TEMPLATES_DIR/config.env.example $PROJECT_DIR/scripts/ralph/config.env"
-  echo "  Then edit EPICS= to match your target epic."
+# 7. Ensure config.env has required fields
+info "Checking config.env..."
+if [[ -f "$PROJECT_DIR/scripts/ralph/config.env" ]]; then
+  # Check for APP_TYPE
+  if ! grep -q '^APP_TYPE=' "$PROJECT_DIR/scripts/ralph/config.env" 2>/dev/null; then
+    warn "config.env missing APP_TYPE. Adding default..."
+    echo "" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    echo "# App type: \"native\" (iOS/macOS Swift) or \"web\" (React, Next.js, etc.)" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    echo "APP_TYPE=web" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    ok "Added APP_TYPE=web to config.env (change to 'native' for Swift/iOS/macOS apps)"
+  fi
+  # Check for FEATURE_BRANCH_PREFIX
+  if ! grep -q '^FEATURE_BRANCH_PREFIX=' "$PROJECT_DIR/scripts/ralph/config.env" 2>/dev/null; then
+    echo "" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    echo "# Feature branch prefix" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    echo "FEATURE_BRANCH_PREFIX=feature/" >> "$PROJECT_DIR/scripts/ralph/config.env"
+    ok "Added FEATURE_BRANCH_PREFIX=feature/ to config.env"
+  fi
+  ok "config.env has required fields"
+else
+  warn "No config.env found. Copying example..."
+  cp "$TEMPLATES_DIR/config.env.example" "$PROJECT_DIR/scripts/ralph/config.env"
+  ok "Created config.env from example — edit EPICS= and APP_TYPE= before running"
 fi
 
 echo ""
 echo -e "${BOLD}${GREEN}Setup complete.${NC}"
 echo ""
 echo "What was patched:"
-echo "  • prompt_work.md — receipt written AFTER quality gates (not before)"
-echo "  •                — gstack /review + /design-review as quality gates"
-echo "  •                — task reset on unfixable quality gate failures"
-echo "  • prompt_completion.md — two-pass task validation (cheap triage, deep-check suspects)"
-echo "  •                     — UI verification deferred to epic completion"
-echo "  •                     — build + screenshot verification at epic level"
+echo "  prompt_work.md — Lead coordinator with parallel subagent spawning:"
+echo "    - Detects parallelizable tasks and spawns Agent workers in worktrees"
+echo "    - Per-task quality pipeline: /review -> /investigate -> /design-review"
+echo "    - Native apps: /ui-verify-xcode for iOS + macOS visual verification"
+echo "    - QA: /qa (web) or /qa methodology via /ui-verify-xcode (native)"
+echo "    - All commits pushed to origin (fixes unpushed worktree commits)"
+echo "    - Workers merge back into feature branch"
+echo ""
+echo "  prompt_completion.md — Epic-level integration testing + shipping:"
+echo "    - Two-pass task validation sweep"
+echo "    - Integration test ALL features: /browse (web) or /ui-verify-xcode (native)"
+echo "    - Fix loop: find issues -> spawn fix agents -> retest until clean"
+echo "    - /cso security audit"
+echo "    - /document-release documentation update"
+echo "    - /codex review on final PR diff"
+echo "    - Full PR review by dedicated agent"
+echo "    - /ship to create PR against main"
+echo ""
+echo "  config.env — New fields:"
+echo "    - APP_TYPE=native|web (controls which quality gates run)"
+echo "    - FEATURE_BRANCH_PREFIX=feature/ (branch naming)"
+echo ""
+echo "Before running, verify config.env:"
+echo "  - EPICS= matches your target epic"
+echo "  - APP_TYPE= matches your project (native for Swift, web for React/Next.js)"
 echo ""
 echo "To run: cd $PROJECT_DIR && scripts/ralph/ralph.sh"
 echo ""

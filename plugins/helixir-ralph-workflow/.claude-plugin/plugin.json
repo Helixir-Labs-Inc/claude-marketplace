@@ -1,6 +1,6 @@
 {
   "name": "helixir-ralph-workflow",
-  "version": "1.0.0",
-  "description": "Coordinated ralph workflow integrating flow-next task management with gstack quality gates. Patches default ralph templates for receipt-gated quality checks, two-pass task validation, and design review integration.",
+  "version": "2.0.0",
+  "description": "Lead coordinator ralph workflow with parallel subagent teams, full quality pipeline (review, investigate, design-review, ui-verify-xcode, qa), integration testing, security audit, and PR shipping via gstack skills.",
   "skills": ["skills/*"]
 }

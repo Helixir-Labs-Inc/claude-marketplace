@@ -1,43 +1,56 @@
 # helixir-ralph-workflow
 
-A Claude Code plugin that coordinates [flow-next](https://github.com/gmickel/flow-next) task management with [gstack](https://github.com/garrytan/gstack) quality gates into a single ralph workflow.
+A Claude Code plugin that coordinates [flow-next](https://github.com/gmickel/flow-next) task management with [gstack](https://github.com/garrytan/gstack) quality gates into an autonomous lead coordinator workflow.
 
-This is NOT a fork of either tool. It is a coordination layer that patches the default ralph templates with customized prompt files and quality gate integration.
+This is NOT a fork of either tool. It is a coordination layer that patches the default ralph templates with a lead coordinator architecture that spawns parallel subagent teams, runs a full quality pipeline per task, and ships PRs with integration testing.
 
-## What it does
+## Architecture
 
-1. **Checks prerequisites** — verifies flow-next plugin and gstack skills are installed, installs them if not
-2. **Patches ralph templates** — overwrites the default prompt templates with versions that integrate gstack quality gates
-3. **Provides a setup skill** — `/helixir:setup` gets everything working on a new machine or project
+```
+ralph.sh (loop) → Lead Coordinator (Claude session)
+                    ├── Reads all ready tasks for epic
+                    ├── Spawns parallel Agent workers in worktrees
+                    │     ├── Worker A: implement → /review → /investigate → /design-review → /ui-verify-xcode → /qa → push
+                    │     ├── Worker B: implement → /review → /investigate → /design-review → /ui-verify-xcode → /qa → push
+                    │     └── Worker C: ...
+                    ├── Merges worker branches → feature branch → push
+                    └── Writes receipts for completed tasks
 
-## What's customized
+                  Epic Completion (after all tasks done)
+                    ├── Per-task validation sweep (two-pass)
+                    ├── Integration test ALL features: /browse (web) or /ui-verify-xcode (native)
+                    ├── Fix loop: find issues → spawn fix agents → retest
+                    ├── /cso (security audit)
+                    ├── /document-release (docs update)
+                    ├── /codex (final diff review)
+                    ├── Full PR review agent
+                    └── /ship (create PR against main)
+```
 
-### Per-task workflow (prompt_work.md)
+## Per-task quality pipeline
 
-The default flow-next work prompt is replaced with one that:
+Every task goes through these gates, whether executed by the coordinator directly or by a parallel subagent:
 
-- Runs gstack `/review` (staff engineer code review) and `/design-review` (visual QA) after each task
-- Writes the impl receipt AFTER quality gates pass, not before — if Claude gets rate-limited mid-quality-gate, the missing receipt causes ralph to retry the task on restart
-- Resets tasks via `flowctl task reset` if quality gates find unfixable critical issues
-- Defers UI verification (simulator build + screenshots) to epic completion to avoid redundant builds per task
+1. **Implement** — `/flow-next:work` executes the task
+2. **Code Review** — `/review` finds production bugs
+3. **Root Cause** — `/investigate` when bugs are suspected (no guessing at fixes)
+4. **Design Review** — `/design-review` audits visual quality
+5. **Visual Verify** — `/ui-verify-xcode` screenshots iOS + macOS (native apps only)
+6. **QA** — `/qa` (web) or `/qa` methodology via `/ui-verify-xcode` (native)
+7. **Push** — every commit pushed to origin
 
-### Epic completion (prompt_completion.md)
+## Epic completion pipeline
 
-The default completion prompt is replaced with one that:
+After all tasks are done:
 
-- Runs a two-pass validation sweep: cheap triage of all done tasks first, deep-check only suspects
-- Builds for iOS Simulator and takes screenshots across all screens affected by the epic
-- Resets suspect tasks that fail validation, causing ralph to re-implement them before returning to completion review
-
-### Rate limit handling
-
-Guidance for replacing the broken Codex CLI fallback in ralph.sh with a wait-and-retry approach. The original fallback used outdated CLI syntax and skipped quality gates.
-
-## What comes from flow-next / gstack
-
-- **flow-next** provides: ralph loop (`ralph.sh`), flowctl CLI, task/epic management, plan/work/review skills, RepoPrompt and Codex review integration
-- **gstack** provides: `/review` (staff engineer code review), `/design-review` (visual QA), `/plan-design-review` (design audit)
-- **This plugin** provides: the glue between them — customized prompts, receipt ordering, two-pass validation, deferred UI verification
+1. **Validate** — two-pass sweep of all done tasks (cheap triage, deep-check suspects)
+2. **Integration test** — `/browse` (web) or `/ui-verify-xcode` (native) tests ALL epic features
+3. **Fix loop** — issues documented → fix agents spawned → retest until clean
+4. **Security** — `/cso` full audit (secrets, dependencies, OWASP, STRIDE)
+5. **Documentation** — `/document-release` updates all project docs
+6. **Codex** — `/codex` second opinion on complete PR diff
+7. **PR Review** — dedicated agent reviews entire feature branch
+8. **Ship** — `/ship` creates PR against main
 
 ## Installation
 
@@ -49,13 +62,13 @@ npx ai-agent-skills install ~/helixir-ralph-workflow
 
 ### Option B: Manual
 
-Clone or copy this directory to `~/helixir-ralph-workflow/`, then register it as a Claude Code plugin.
+Clone or copy this directory, then register it as a Claude Code plugin.
 
 ## Usage
 
 ### First-time setup on a project
 
-1. Make sure the project has ralph scaffolded:
+1. Scaffold ralph if the project doesn't have it:
    ```
    /flow-next:ralph-init
    ```
@@ -69,10 +82,10 @@ Clone or copy this directory to `~/helixir-ralph-workflow/`, then register it as
    ~/helixir-ralph-workflow/scripts/setup.sh /path/to/your/project
    ```
 
-3. Configure your epic:
+3. Configure your epic in `scripts/ralph/config.env`:
    ```bash
-   cp ~/helixir-ralph-workflow/templates/config.env.example scripts/ralph/config.env
-   # Edit EPICS= to match your target epic
+   EPICS=fn-1-your-epic-slug
+   APP_TYPE=native   # "native" for Swift iOS/macOS, "web" for React/Next.js
    ```
 
 4. Start ralph:
@@ -82,42 +95,45 @@ Clone or copy this directory to `~/helixir-ralph-workflow/`, then register it as
 
 ### After flow-next or gstack updates
 
-Re-run the setup to re-patch the templates:
+Re-run setup to re-patch the templates:
 ```bash
 ~/helixir-ralph-workflow/scripts/setup.sh /path/to/your/project
 ```
 
-The setup script is idempotent — it overwrites the prompt files with the latest versions from this plugin.
+## Configuration
+
+| Variable | Values | Default | Purpose |
+|----------|--------|---------|---------|
+| `EPICS` | epic slug | — | Target epic(s) |
+| `APP_TYPE` | `native`, `web` | `web` | Controls quality gates: native uses /ui-verify-xcode, web uses /browse and /qa |
+| `FEATURE_BRANCH_PREFIX` | string | `feature/` | Prefix for feature branches |
+| `BRANCH_MODE` | `current`, `new` | `current` | How ralph manages branches |
+| `WORK_REVIEW` | `codex`, `rp`, `none` | `codex` | Per-task review backend |
+| `COMPLETION_REVIEW` | `codex`, `rp`, `none` | `codex` | Epic completion review backend |
+| `MAX_ITERATIONS` | number | `25` | Max ralph loop iterations |
+| `MAX_ATTEMPTS_PER_TASK` | number | `5` | Retry limit per task |
+| `YOLO` | `0`, `1` | `1` | Skip permission prompts |
 
 ## Symlinks: always use copies
 
-Both gstack and flow-next skills MUST be installed as real file copies in `~/.claude/skills/`, not symlinks. Claude Code subagents cannot follow symlinks — they silently fail to read the skill files.
+Both gstack and flow-next skills MUST be installed as real file copies in `~/.claude/skills/`, not symlinks. Claude Code subagents cannot follow symlinks — they silently fail to read skill files.
 
 The setup script detects symlinks and converts them to copies automatically.
 
 ## Directory structure
 
 ```
-~/helixir-ralph-workflow/
-├── plugin.json              # Plugin manifest
-├── README.md                # This file
+helixir-ralph-workflow/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
+├── README.md                    # This file
 ├── skills/
-│   └── helixir-setup/
-│       └── SKILL.md         # /helixir:setup skill definition
+│   └── helixir-setup-ralph-script/
+│       └── SKILL.md             # /helixir:setup skill definition
 ├── templates/
-│   ├── prompt_work.md       # Customized per-task prompt
-│   ├── prompt_completion.md # Customized epic completion prompt
-│   └── config.env.example   # Example ralph config
+│   ├── prompt_work.md           # Lead coordinator + parallel workers
+│   ├── prompt_completion.md     # Integration testing + security + docs + ship
+│   └── config.env.example       # Example ralph config
 └── scripts/
-    └── setup.sh             # Setup and patching script
+    └── setup.sh                 # Setup and patching script
 ```
-
-## Rate limit handling
-
-The default flow-next ralph.sh may include a Codex CLI fallback for rate limits. This fallback has known issues:
-
-- Uses outdated `codex --approval-mode` syntax
-- Sends a dumbed-down prompt that skips quality gates
-- Can duplicate already-committed work
-
-The recommended approach is wait-and-retry: when rate-limited, sleep for `RALPH_RATE_LIMIT_WAIT` seconds (default 300) and retry with Claude Code. The setup script detects the broken fallback and warns you if it's present.
