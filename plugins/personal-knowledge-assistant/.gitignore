@@ -1,0 +1,7 @@
+# Python venvs
+scripts/venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
