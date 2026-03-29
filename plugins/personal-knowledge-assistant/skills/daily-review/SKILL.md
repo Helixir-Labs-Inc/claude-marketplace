@@ -12,6 +12,7 @@ Read the CLAUDE.md in the PKA root to understand domains and schedule config.
 **Today's Activity:**
 - Read today's journal entry for the morning's locked-in top 3
 - Check git log across active repos for today's commits
+- Read session summaries from `~/.claude/logs/` for today (glob `~/.claude/logs/$(date +%Y-%m-%d)/session-*.md`)
 - Check Linear for issues updated today (if available)
 - Check today's calendar events (what meetings happened)
 - Check Gmail for sent messages today (what was communicated)
@@ -38,6 +39,10 @@ Read the CLAUDE.md in the PKA root to understand domains and schedule config.
 
 **Personal**
 - ✅ [thing done — 1 line]
+
+### AI Sessions
+- [N sessions across dirs — 1 line per notable session with what was worked on]
+(skip if no sessions today)
 
 ### In Progress (carrying forward)
 - ⏳ [task — status/next step]

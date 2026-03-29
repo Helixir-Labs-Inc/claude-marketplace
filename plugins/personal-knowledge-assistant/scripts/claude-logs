@@ -1,0 +1,185 @@
+#!/bin/bash
+# Browse and manage Claude Code session logs
+# Usage:
+#   claude-logs              # list today's sessions
+#   claude-logs yesterday    # list yesterday's sessions
+#   claude-logs 2026-03-26   # list sessions for a specific date
+#   claude-logs latest       # show latest session summary
+#   claude-logs summary <id> # regenerate summary for a session
+#   claude-logs tail         # follow the latest session log
+#   claude-logs stats        # show usage stats
+#   claude-logs daily-digest # markdown rollup of today's sessions
+
+LOG_BASE="$HOME/.claude/logs"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV_PYTHON="$SCRIPT_DIR/venv/bin/python3"
+SUMMARIZE="$SCRIPT_DIR/summarize-session.py"
+
+# Find a working python
+find_python() {
+    if [[ -f "$VENV_PYTHON" ]]; then
+        echo "$VENV_PYTHON"
+    elif command -v python3 &>/dev/null; then
+        echo "python3"
+    else
+        echo ""
+    fi
+}
+
+case "${1:-today}" in
+    today)
+        date_dir=$(date +"%Y-%m-%d")
+        ;;
+    yesterday)
+        date_dir=$(date -v-1d +"%Y-%m-%d")
+        ;;
+    latest)
+        if [[ -L "$LOG_BASE/latest.md" ]]; then
+            target=$(readlink "$LOG_BASE/latest.md")
+            if [[ -f "$target" ]]; then
+                cat "$target"
+            else
+                echo "Latest summary symlink is broken."
+            fi
+        else
+            echo "No session summaries yet."
+        fi
+        exit 0
+        ;;
+    summary)
+        session_file=$(find "$LOG_BASE" -name "session-${2}*.jsonl" 2>/dev/null | head -1)
+        if [[ -z "$session_file" ]]; then
+            echo "Session not found: $2"
+            exit 1
+        fi
+        py=$(find_python)
+        if [[ -n "$py" ]]; then
+            "$py" "$SUMMARIZE" "$session_file"
+        else
+            echo "Python3 not found. Install python3 or run: python3 -m venv $SCRIPT_DIR/venv"
+        fi
+        exit 0
+        ;;
+    tail)
+        if [[ -L "$LOG_BASE/latest.jsonl" ]]; then
+            target=$(readlink "$LOG_BASE/latest.jsonl")
+            if [[ -f "$target" ]]; then
+                tail -f "$target" | jq -c '{event: .logEvent, hook: .hook_event_name, tool: .tool_name, role: .role}'
+            else
+                echo "Latest log symlink is broken."
+            fi
+        else
+            echo "No active session log."
+        fi
+        exit 0
+        ;;
+    stats)
+        echo "=== Claude Code Session Stats ==="
+        total_sessions=$(find "$LOG_BASE" -name "session-*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
+        total_days=$(find "$LOG_BASE" -mindepth 1 -maxdepth 1 -type d -not -name '.state' 2>/dev/null | wc -l | tr -d ' ')
+        echo "Total sessions: $total_sessions"
+        echo "Days tracked: $total_days"
+        echo ""
+        echo "Sessions per day (last 7 days):"
+        for i in $(seq 0 6); do
+            d=$(date -v-${i}d +"%Y-%m-%d")
+            count=$(find "$LOG_BASE/$d" -name "session-*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
+            [[ "$count" -gt 0 ]] && echo "  $d: $count sessions"
+        done
+        exit 0
+        ;;
+    daily-digest)
+        date_dir="${2:-$(date +"%Y-%m-%d")}"
+        dir="$LOG_BASE/$date_dir"
+        if [[ ! -d "$dir" ]]; then
+            echo "No logs for $date_dir"
+            exit 0
+        fi
+
+        echo "## Session Activity — $date_dir"
+        echo ""
+
+        total_sessions=0
+        total_tools=0
+
+        for f in "$dir"/session-*.jsonl; do
+            [[ -f "$f" ]] || continue
+            total_sessions=$((total_sessions + 1))
+
+            session_id=$(basename "$f" .jsonl | sed 's/session-//')
+            first_ts=$(head -1 "$f" | jq -r '.timestamp // .logTimestamp // empty' 2>/dev/null)
+            last_ts=$(tail -1 "$f" | jq -r '.timestamp // .logTimestamp // empty' 2>/dev/null)
+            cwd=$(grep -m1 '"cwd"' "$f" | jq -r '.cwd // empty' 2>/dev/null || true)
+
+            start_time=""
+            [[ -n "$first_ts" ]] && start_time=$(date -r "$first_ts" +"%H:%M" 2>/dev/null || true)
+            end_time=""
+            [[ -n "$last_ts" ]] && end_time=$(date -r "$last_ts" +"%H:%M" 2>/dev/null || true)
+
+            # Extract first user message
+            first_msg=$(grep '"UserPromptSubmit"' "$f" | head -1 | jq -r '.user_message // .message // empty' 2>/dev/null | head -c 120 || true)
+            if [[ -z "$first_msg" ]]; then
+                # Try transcript items
+                first_msg=$(grep '"type":"user"' "$f" | head -1 | jq -r '.message.content // empty' 2>/dev/null | head -c 120 || true)
+                # Skip system messages
+                [[ "$first_msg" == "<"* ]] && first_msg=""
+            fi
+
+            # Count tool uses
+            tool_count=$(grep -c '"PreToolUse"' "$f" 2>/dev/null || echo "0")
+            total_tools=$((total_tools + tool_count))
+
+            # Get tool breakdown
+            tool_summary=$(grep '"PreToolUse"' "$f" | jq -r '.tool_name' 2>/dev/null | sort | uniq -c | sort -rn | head -5 | awk '{printf "%s %sx, ", $2, $1}' | sed 's/, $//')
+
+            echo "### Session (${start_time:-??:??}–${end_time:-??:??}) — ${cwd:-unknown}"
+            [[ -n "$first_msg" ]] && echo "- \"$first_msg\""
+            [[ -n "$tool_summary" ]] && echo "- Tools: $tool_summary"
+            echo ""
+        done
+
+        echo "**Totals:** $total_sessions sessions, ~$total_tools tool calls"
+        exit 0
+        ;;
+    20[0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+        date_dir="$1"
+        ;;
+    *)
+        echo "Usage: claude-logs [today|yesterday|YYYY-MM-DD|latest|summary <id>|tail|stats|daily-digest [date]]"
+        exit 1
+        ;;
+esac
+
+# Default: list sessions for a date
+dir="$LOG_BASE/$date_dir"
+if [[ ! -d "$dir" ]]; then
+    echo "No logs for $date_dir"
+    exit 0
+fi
+
+echo "=== Sessions for $date_dir ==="
+echo ""
+
+for f in "$dir"/session-*.jsonl; do
+    [[ -f "$f" ]] || continue
+    session_id=$(basename "$f" .jsonl | sed 's/session-//')
+    first_ts=$(head -1 "$f" | jq -r '.timestamp // .logTimestamp // empty' 2>/dev/null)
+    last_ts=$(tail -1 "$f" | jq -r '.timestamp // .logTimestamp // empty' 2>/dev/null)
+    line_count=$(wc -l < "$f" | tr -d ' ')
+    cwd=$(grep -m1 '"cwd"' "$f" | jq -r '.cwd // empty' 2>/dev/null || true)
+
+    first_msg=$(grep '"UserPromptSubmit"' "$f" | head -1 | jq -r '.user_message // .message // empty' 2>/dev/null | head -c 80 || true)
+
+    start_time=""
+    [[ -n "$first_ts" ]] && start_time=$(date -r "$first_ts" +"%H:%M" 2>/dev/null || true)
+    end_time=""
+    [[ -n "$last_ts" ]] && end_time=$(date -r "$last_ts" +"%H:%M" 2>/dev/null || true)
+
+    echo "  ${session_id:0:12}  ${start_time:-??:??}-${end_time:-??:??}  ${line_count} events"
+    [[ -n "$cwd" ]] && echo "    dir: $cwd"
+    [[ -n "$first_msg" ]] && echo "    \"$first_msg\""
+
+    summary_file="$dir/session-${session_id}.md"
+    [[ -f "$summary_file" ]] && echo "    summary: $summary_file"
+    echo ""
+done

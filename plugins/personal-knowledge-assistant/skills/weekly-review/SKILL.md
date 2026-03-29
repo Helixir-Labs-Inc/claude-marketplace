@@ -12,6 +12,7 @@ Read the CLAUDE.md in the PKA root to understand domains and goals.
 **This Week's Activity:**
 - Read all journal entries from this week (Mon-Fri)
 - Check git log across active repos for this week's commits
+- Read session summaries from `~/.claude/logs/` for Mon-Fri (glob each day's `session-*.md` files)
 - Check Linear for issues completed this week (if available)
 - Check Linear for issues still in progress
 - Read area docs at domain roots for goals context
@@ -48,6 +49,11 @@ Read the CLAUDE.md in the PKA root to understand domains and goals.
 **Personal Goals**
 - [learning goal] — [what you learned/practiced]
 - [health/life goal] — [progress]
+
+### AI Collaboration
+- [N sessions this week across M projects]
+- Most active: [repo — N sessions]
+(skip if no session logs available)
 
 ### Carrying Into Next Week
 - [task/project — next step]

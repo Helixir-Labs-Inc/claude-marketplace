@@ -30,7 +30,10 @@ Do NOT narrate what you're gathering. Run all of these in parallel:
 - Linear: list assigned issues in progress or high priority (if available)
 - Slack: check for unread DMs or mentions (if available)
 
-**Code Activity:**
+**Yesterday's Sessions:**
+- Read session summaries from `~/.claude/logs/` for yesterday (glob `~/.claude/logs/$(date -v-1d +%Y-%m-%d)/session-*.md`)
+- Note sessions that ended with in-progress work or unfinished tasks
+- Check for sessions in repos the user is actively working in
 - Recent git commits in active repos (check domains for repo references)
 
 ## Step 2: Present the Brief

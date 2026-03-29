@@ -157,17 +157,29 @@ Ready to scaffold? (yes/no)
 
 ### Step 9: Build Everything
 
-On confirmation, create the full structure:
+On confirmation, create the full structure (session logging is set up first, then the PKA folder):
 
-1. **Create PKA directory** at chosen location
-2. **Initialize git repo** with `.gitignore`
-3. **Create domain folders** with area docs for each domain:
+1. **Set up session logging:**
+   - Create `~/.claude/logs/` directory
+   - Verify the plugin's hooks are active (the plugin's `hooks/hooks.json` auto-registers them)
+   - Symlink the `claude-logs` CLI to `/usr/local/bin/claude-logs` (from `${CLAUDE_PLUGIN_ROOT}/scripts/claude-logs`)
+   - Set up Python venv for summarizer: `python3 -m venv ${CLAUDE_PLUGIN_ROOT}/scripts/venv && ${CLAUDE_PLUGIN_ROOT}/scripts/venv/bin/pip install -r ${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt`
+   - Test: run `claude-logs stats` to verify
+2. **Create `~/CLAUDE.md` router** — the home directory routing file that directs agents to projects vs PKA vs session logs. Content:
+   ```
+   # Home Base
+   Route: project work → ~/_git/[repo], personal knowledge → ~/pka/, session logs → ~/.claude/logs/
+   ```
+   (Use the full router template from the plugin — see below)
+3. **Create PKA directory** at chosen location
+4. **Initialize git repo** with `.gitignore`
+5. **Create domain folders** with area docs for each domain:
    - For personal: health.md, finance.md, family.md, learning/, career/, journal/, notes/, projects/, meetings/
    - For work domains: notes/, projects/, meetings/, plus any sub-areas they specified
    - Area docs (`.md` at domain root) include a `Files:` reference to the storage mirror path
-4. **Create inbox folders** (gitignored): inbox/inbox-personal/, inbox/inbox-[domain]/, etc.
-5. **Create shared folders**: templates/, meta/
-6. **Write CLAUDE.md** with (include ONLY enabled integrations):
+6. **Create inbox folders** (gitignored): inbox/inbox-personal/, inbox/inbox-[domain]/, etc.
+7. **Create shared folders**: templates/, meta/
+8. **Write CLAUDE.md** with (include ONLY enabled integrations):
    - Domain structure and routing rules
    - File storage mapping (domain → path)
    - Schedule awareness (work hours, personal hours)
@@ -176,34 +188,38 @@ On confirmation, create the full structure:
    - Inbox triage workflow
    - Note conventions (frontmatter, linking)
    - MCP integration references
-7. **Write meta files**:
+   - Session logging reference: `~/.claude/logs/` and `claude-logs` CLI
+9. **Write meta files**:
    - `meta/file-locations.md` — domain → file storage path map
    - `meta/device-setup.md` — machine-specific paths and tool checklist
    - `meta/workspaces.md` — workspace definitions for apps
-8. **Write templates**: meeting-note.md, journal-entry.md, project-kickoff.md, learning-topic.md
-9. **Write setup.sh** — bootstrap script for new devices
-10. **Write README.md** — quick reference
-11. **Initial git commit**
+10. **Write templates**: meeting-note.md, journal-entry.md, project-kickoff.md, learning-topic.md
+11. **Write setup.sh** — bootstrap script for new devices
+12. **Write README.md** — quick reference
+13. **Initial git commit**
 
-### Step 9: Post-Setup
+### Step 10: Post-Setup
 
 After scaffolding, tell the user:
 
 ```
 PKA is ready at [path].
 
-To start using it:
-  cd [path] && claude
+Session logging is active — all Claude Code sessions are tracked at ~/.claude/logs/
+Run `claude-logs` to browse session history.
+
+To start using PKA:
+  cd ~/ && claude
 
 Available commands:
-  /morning-planning — start your day
-  /daily-review — end of day check-in
-  /weekly-review — Friday retrospective
+  /morning-planning — start your day (includes yesterday's session recap)
+  /daily-review — end of day check-in (includes AI session activity)
+  /weekly-review — Friday retrospective (includes weekly session stats)
   /next-3 — get your next 3 focus items
   /triage-inbox — process inbox files
 
-Pro tip: Keep a terminal window with Claude running from your PKA folder
-at all times — your personal knowledge assistant is always a message away.
+Your home directory (~/) has a CLAUDE.md that routes between project work and PKA.
+Start sessions from ~/ — the agent will figure out where to go.
 ```
 
 Check which MCP integrations are available (Gmail, Calendar, Linear, Slack) and tell the user which accounts are connected and which need setup.
