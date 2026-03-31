@@ -4,13 +4,71 @@ description: Explains how to set up and use the helixir-ralph-workflow plugin. R
 
 # How to Use helixir-ralph-workflow
 
-This plugin gives you an autonomous lead coordinator that executes flow-next epics with parallel subagent teams and a full quality pipeline.
+## Response instructions
+
+If this skill is invoked without a specific question, respond with the summary below verbatim (the "Default response" section). If the user asks a specific question about the workflow, answer it directly using the detailed reference that follows.
 
 ---
 
-## First-time setup
+## Default response
 
-### 1. Install prerequisites
+The helixir-ralph-workflow is an autonomous build pipeline that executes flow-next epics end-to-end with minimal human intervention. Here's how it works:
+
+### The Big Picture
+
+You define an epic (a feature broken into tasks via `/flow-next:plan`), then ralph runs a loop that picks up tasks, builds them, reviews them, and ships a PR — all autonomously.
+
+### The Flow
+
+1. You plan an epic using `/flow-next:plan` — this creates structured tasks in `.flow/`
+2. You create a ralph script for that epic (`/helixir:setup-ralph-script`) — this generates an isolated directory with config and templates
+3. You start the ralph loop (`scripts/ralph-<epic>/ralph.sh`) — then walk away
+
+### What Ralph Does Per Task
+
+For each ready task, the coordinator:
+
+1. Spawns worker agents (in parallel if tasks have no conflicts)
+2. Each worker runs a quality pipeline:
+   - Implement — builds the feature
+   - Code review — finds bugs
+   - Debug — root cause analysis if bugs found
+   - Design review — visual quality audit
+   - Visual verify — screenshots (iOS/macOS for native apps)
+   - QA — systematic testing
+3. Workers commit and push
+4. Coordinator merges worker branches into the feature branch
+
+### After All Tasks Complete
+
+Ralph runs an epic-level quality pass: integration testing, security audit, documentation updates, final review, then creates a PR.
+
+### Key Details
+
+- Parallel execution — multiple tasks with no dependency conflicts run simultaneously in git worktrees
+- Self-correcting — if review finds bugs, it spawns fix agents and retests
+- Configurable — `APP_TYPE=native|web` controls which quality gates run (e.g., Xcode screenshots vs browser QA)
+- Controllable — pause/resume/stop with touch files while it's running
+- Isolated — each epic gets its own directory, so you can run multiple epics in parallel across terminals
+
+### Setup Steps
+
+1. `/helixir:init-agent-skills` — one-time prerequisite install
+2. `/flow-next:plan` — plan your epic
+3. `/helixir:setup-ralph-script` — create the ralph script for that epic
+4. Run `scripts/ralph-<epic>/ralph.sh` — start the autonomous loop
+
+Want to plan an epic and set this up?
+
+---
+
+## Detailed reference
+
+The sections below provide full details for answering specific questions.
+
+### First-time setup
+
+#### 1. Install prerequisites
 
 ```
 /helixir:init-agent-skills
@@ -18,7 +76,7 @@ This plugin gives you an autonomous lead coordinator that executes flow-next epi
 
 This installs flow-next and gstack, converts symlinks to real copies. Idempotent — skips anything already installed.
 
-### 2. Create a ralph script for your epic
+#### 2. Create a ralph script for your epic
 
 ```
 /helixir:setup-ralph-script
@@ -34,7 +92,7 @@ Example:
 ${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-script.sh fn-10-note-editor-redesign . native
 ```
 
-### 3. Configure (optional)
+#### 3. Configure (optional)
 
 Edit `scripts/ralph-<epic-slug>/config.env` to adjust:
 
@@ -44,7 +102,7 @@ WORK_REVIEW=codex      # codex, rp, or none
 COMPLETION_REVIEW=codex
 ```
 
-### 4. Start the ralph loop
+#### 4. Start the ralph loop
 
 ```bash
 scripts/ralph-<epic-slug>/ralph.sh
@@ -52,7 +110,7 @@ scripts/ralph-<epic-slug>/ralph.sh
 
 ---
 
-## Running multiple epics in parallel
+### Running multiple epics in parallel
 
 Each epic gets its own ralph directory with isolated state:
 
@@ -68,9 +126,9 @@ No conflicts — each has its own config, templates, runs/, and state.
 
 ---
 
-## How it works
+### How it works
 
-### Per-task (the coordinator handles this)
+#### Per-task (the coordinator handles this)
 
 Each ralph iteration, the lead coordinator:
 
@@ -90,7 +148,7 @@ Each ralph iteration, the lead coordinator:
 4. Workers commit and **push** to origin
 5. Coordinator merges worker branches into the feature branch
 
-### Epic completion (after all tasks done)
+#### Epic completion (after all tasks done)
 
 | Step | Skill | Purpose |
 |------|-------|---------|
@@ -105,7 +163,7 @@ Each ralph iteration, the lead coordinator:
 
 ---
 
-## Skills reference
+### Skills reference
 
 | Skill | Purpose |
 |-------|---------|
@@ -115,7 +173,7 @@ Each ralph iteration, the lead coordinator:
 
 ---
 
-## Configuration reference
+### Configuration reference
 
 | Variable | Values | Default | Purpose |
 |----------|--------|---------|---------|
@@ -132,7 +190,7 @@ Each ralph iteration, the lead coordinator:
 
 ---
 
-## Controlling ralph
+### Controlling ralph
 
 While ralph is running:
 
@@ -143,7 +201,7 @@ While ralph is running:
 
 ---
 
-## Troubleshooting
+### Troubleshooting
 
 **Commits not being pushed?** Re-run `/helixir:setup-ralph-script` to re-patch the templates. The v2.0 templates explicitly push after every commit.
 
