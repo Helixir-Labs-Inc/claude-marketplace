@@ -100,6 +100,67 @@ if [[ -d "$FLOW_NEXT_SKILLS" ]]; then
   fi
 fi
 
+# 4. Check xcode-native-toolkit plugin (for native app projects)
+info "Checking xcode-native-toolkit skills..."
+XCODE_TOOLKIT_DIR="$HOME/.claude/plugins/marketplaces/helixir-labs-inc/plugins/xcode-native-toolkit/skills"
+if [[ -d "$XCODE_TOOLKIT_DIR" && -f "$XCODE_TOOLKIT_DIR/ui-preview/SKILL.md" ]]; then
+  cd "$HOME/.claude/skills"
+  copied=0
+  for skill_dir in "$XCODE_TOOLKIT_DIR"/*/; do
+    skill_name=$(basename "$skill_dir")
+    if [[ ! -d "$HOME/.claude/skills/$skill_name" ]]; then
+      cp -R "$skill_dir" "$HOME/.claude/skills/$skill_name"
+      copied=$((copied + 1))
+    else
+      # Update existing copies if plugin version is newer
+      if ! diff -rq "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill_name/SKILL.md" >/dev/null 2>&1; then
+        cp -R "$skill_dir"/* "$HOME/.claude/skills/$skill_name/"
+        copied=$((copied + 1))
+      fi
+    fi
+  done
+  if [[ $copied -gt 0 ]]; then
+    ok "Installed/updated $copied xcode-native-toolkit skills (ui-preview, ui-verify-xcode, qa-xcode)"
+  else
+    ok "xcode-native-toolkit skills up to date"
+  fi
+else
+  warn "xcode-native-toolkit plugin not found in marketplace"
+  echo "  Expected at: $XCODE_TOOLKIT_DIR"
+  echo "  Skills /ui-preview, /ui-verify-xcode, /qa-xcode will not be available."
+  echo "  For native app projects (APP_TYPE=native), install the xcode-native-toolkit plugin."
+fi
+
+# 5. Check Xcode MCP bridge (optional, for native projects)
+info "Checking Xcode MCP bridge..."
+if command -v xcrun >/dev/null 2>&1 && xcrun --find mcpbridge >/dev/null 2>&1; then
+  ok "xcrun mcpbridge available"
+  if claude mcp list 2>/dev/null | grep -q "xcode"; then
+    ok "Xcode MCP bridge configured in Claude Code"
+  else
+    warn "Xcode MCP bridge not configured. For native projects, run:"
+    echo "  claude mcp add --transport stdio xcode -- xcrun mcpbridge"
+  fi
+else
+  info "xcrun mcpbridge not found (Xcode 26.3+ required). Skipping — not needed for web projects."
+fi
+
+# 6. Check native CLI tools (optional, for native projects)
+info "Checking native development CLI tools..."
+missing_tools=()
+command -v xcsift >/dev/null 2>&1 || missing_tools+=("xcsift")
+command -v axe >/dev/null 2>&1 || missing_tools+=("axe")
+command -v magick >/dev/null 2>&1 || missing_tools+=("imagemagick")
+command -v ffmpeg >/dev/null 2>&1 || missing_tools+=("ffmpeg")
+if [[ ${#missing_tools[@]} -eq 0 ]]; then
+  ok "All native CLI tools installed (xcsift, axe, imagemagick, ffmpeg)"
+else
+  warn "Missing native tools: ${missing_tools[*]}"
+  echo "  For native app projects, install with:"
+  echo "  brew install ${missing_tools[*]}"
+  echo "  (axe may need: brew tap cameroncooke/axe && brew install axe)"
+fi
+
 echo ""
 echo -e "${BOLD}${GREEN}Agent skills ready.${NC}"
 echo ""

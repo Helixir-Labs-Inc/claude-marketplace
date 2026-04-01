@@ -102,19 +102,24 @@ Use `/browse` to systematically test every feature:
 ### If APP_TYPE = native:
 
 ```
-/ui-verify-xcode
+/qa-xcode --exhaustive
 ```
 
-Build and test on BOTH platforms:
+Run exhaustive-tier QA on the full epic. This builds, launches in simulator,
+records video of every user flow from the epic spec, tests edge cases (empty
+states, errors, accessibility, Dynamic Type), and produces a structured report
+with health score and video evidence.
+
+Test on BOTH platforms:
 
 **iOS Simulator:**
 1. Build, install, launch
-2. Navigate to each affected screen using deep links and accessibility tools
-3. Screenshot each screen — verify layout, dark mode, design tokens
-4. Test each user flow by tapping through with `axe tap`
-5. Test edge cases: empty states, error states, keyboard handling, rotation
+2. Record video while navigating each user flow
+3. Extract frames to verify navigation, animations, state transitions
+4. Test edge cases: empty states, error states, keyboard handling, rotation
+5. Test accessibility: VoiceOver labels, touch targets, Dynamic Type
 
-**macOS (Mac Catalyst):**
+**macOS:**
 1. Build and launch
 2. Screenshot key screens
 3. Verify macOS-specific behavior: menu bar items, keyboard shortcuts, window resizing

@@ -1,0 +1,23 @@
+{
+  "name": "xcode-native-toolkit",
+  "version": "1.0.0",
+  "description": "Native iOS/macOS development skills for Claude Code. Quick SwiftUI preview checks via Xcode MCP, simulator integration testing with video recording, and systematic native QA with structured reports. Designed for the Helixir Ralph workflow but works standalone.",
+  "author": {
+    "name": "Aric Crosson Bouwers",
+    "url": "https://github.com/ariccb"
+  },
+  "repository": "https://github.com/Helixir-Labs-Inc/claude-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "xcode",
+    "ios",
+    "macos",
+    "swiftui",
+    "simulator",
+    "native",
+    "qa",
+    "ui-testing",
+    "mcp",
+    "preview"
+  ]
+}

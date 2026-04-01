@@ -109,20 +109,37 @@ Use `/investigate` to perform systematic root cause analysis. Do NOT guess at fi
 
 This audits visual quality against the design system. Fix issues and commit as separate commits. Save any before/after screenshots produced.
 
-### W4: Visual Verification (native apps only)
+### W4: Visual Preview Verification (native apps only)
 
 **Skip this step if APP_TYPE = `web`.**
 
 If APP_TYPE = `native`:
 ```
+/ui-preview
+```
+
+Quick preview check of all changed SwiftUI views via Xcode MCP `RenderPreview`.
+No build needed — seconds per view. Batch-preview all changed views, fix layout/
+spacing/color/typography issues, re-preview until all views pass. Verify:
+- Layout correctness — no clipping, misalignment, or overflow
+- Design system tokens (colors, typography, spacing) match DESIGN.md
+- Both light and dark appearance (if preview supports it)
+
+Fix any issues found. Commit fixes.
+
+### W4b: Simulator Integration Test (native apps only)
+
+**Skip this step if APP_TYPE = `web`.**
+**Skip this step if the task has NO navigation, animation, or multi-view changes.**
+
+If APP_TYPE = `native` AND the task touches navigation/animations/multi-view flows:
+```
 /ui-verify-xcode
 ```
 
-Screenshot both iOS and macOS builds. Verify:
-- Layout correctness — no clipping, misalignment, or overflow
-- Dark mode appearance
-- Design system tokens (colors, typography, spacing) match DESIGN.md
-- Both iPhone and iPad layouts where applicable
+Build, install, launch in simulator. Record video of affected user flows.
+Extract frames to verify navigation and transitions work correctly.
+Test both iPhone and iPad layouts where applicable.
 
 Fix any issues found. Commit fixes.
 
@@ -135,13 +152,13 @@ Fix any issues found. Commit fixes.
 Runs systematic QA, finds bugs, fixes them, re-verifies.
 
 **If APP_TYPE = `native`:**
-Apply the `/qa` methodology using `/ui-verify-xcode` as the verification tool:
-1. List all acceptance criteria and user flows affected by this task
-2. For each flow: build, launch, navigate, and screenshot using `/ui-verify-xcode`
-3. Test edge cases: empty states, error states, rotation, accessibility, keyboard handling
-4. Test both iOS Simulator and macOS (Mac Catalyst) builds
-5. Document failures with screenshots and repro steps
-6. Fix all issues found. Commit fixes.
+```
+/qa-xcode
+```
+Systematic native QA: builds, launches in simulator, records video of user flows
+affected by this task, tests edge cases (empty states, error states, keyboard,
+accessibility), fixes issues with atomic commits, and produces a structured report.
+Tests both iOS Simulator and macOS builds.
 
 ### W6: Commit and push
 
