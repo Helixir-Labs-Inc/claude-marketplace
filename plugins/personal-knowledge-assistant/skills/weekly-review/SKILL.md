@@ -1,11 +1,17 @@
 ---
 name: weekly-review
-description: "Friday weekly retrospective — what shipped, goals progress, next week preview. Use when: 'weekly review', 'friday review', 'retro', 'what did I ship this week', 'week recap'. Scheduled 4pm Friday."
+description: "Weekly retrospective + boss recap email. Use when: 'weekly review', 'friday review', 'retro', 'what did I ship this week', 'week recap', 'boss update', 'weekly recap'. Thursday = boss recap email, Friday = personal review."
 ---
 
-# Weekly Review — Friday Retrospective
+# Weekly Review
 
 Read the CLAUDE.md in the PKA root to understand domains and goals.
+
+This skill has two outputs:
+1. **Boss Weekly Recap** (Thursday EOD) — structured email for Max in his required format
+2. **Personal Retrospective** (Friday) — personal goals, trajectory, next week preview
+
+When run on Thursday (or when the user says "boss recap", "weekly recap for Max"), prioritize the boss recap. When run on Friday, do both. When ambiguous, do both.
 
 ## Step 1: Gather Context (silently, in parallel)
 
@@ -27,7 +33,43 @@ Read the CLAUDE.md in the PKA root to understand domains and goals.
 **Email:**
 - Count of threads handled this week (if Gmail available)
 
-## Step 2: Present the Review
+**Metrics (for boss recap):**
+- Count measurable inputs: contacts enriched, emails sent, meetings booked, PRs merged, issues closed, deploys shipped, etc.
+- Note any specific numbers from Linear, git, or session logs
+
+## Step 2: Boss Weekly Recap Email
+
+Draft an email reply to Max using this exact format. Calculate the ISO week number from today's date.
+
+```
+Week: [ISO week number]
+
+**What I worked on this week**
+- [Key activity, project, or deliverable — 1 line each]
+- [Key activity, project, or deliverable — 1 line each]
+- [...]
+
+**Numbers / highlights**
+- [Measurable inputs: PRs merged, issues closed, meetings, deploys, contacts enriched, emails sent, etc.]
+- [Any notable wins or milestones]
+
+**Blockers or challenges**
+- [Anything slowing you down or where you need support]
+- [Or: "None this week"]
+
+**Plan for next week**
+1. [Top priority]
+2. [Second priority]
+3. [Third priority]
+```
+
+**Tone:** Professional but casual — first-name basis, no corporate speak. Keep it concise and scannable. Focus on activity and inputs Max cares about. Don't pad with fluff.
+
+**Present the draft to the user for review before sending.** After approval, draft it as a Gmail reply to Max's weekly recap thread (search Gmail for the original email from Max about weekly recaps).
+
+## Step 3: Personal Retrospective
+
+Skip this step if the user only asked for the boss recap. Include it on Fridays or when explicitly asked.
 
 ```
 ## Week of [Month DD–DD] — Weekly Review
@@ -69,9 +111,9 @@ Week score: [shipped X items, Y meetings, Z learning sessions]
 Highlight: [single best thing that happened this week]
 ```
 
-## Step 3: Update Journal
+## Step 4: Update Journal
 
-Create a weekly summary entry: `<pka>/personal/journal/YYYY/MM/YYYY-MM-DD-weekly.md`
+Create a weekly summary entry in the Personal workspace: `~/Documents/Personal Documents/02 Areas/Journal/YYYY/MM/YYYY-MM-DD-weekly.md`
 
 ```yaml
 ---
@@ -81,7 +123,7 @@ type: weekly-review
 ---
 ```
 
-Include the full review content so it's searchable later.
+Include the full review content (both boss recap and personal retrospective) so it's searchable later.
 
 ## Tone
 - Zoom out. This is about trajectory, not daily tasks.
