@@ -2,7 +2,10 @@
 
 Autonomous lead coordinator workflow for [flow-next](https://github.com/gmickel/flow-next) + [gstack](https://github.com/garrytan/gstack). Spawns parallel subagent teams in worktrees, runs a full quality pipeline per task, and ships PRs with integration testing.
 
-Run `/how-to-use` after installing for full setup instructions.
+## Two ways to get oriented
+
+- **`/helixir:whats-next`** — Dynamic advisor. Reads your live project state (epics, tasks, reviews run, scale) and recommends the best next skills to run. Use when you're mid-project, coming back after a break, or unsure what stage you're at.
+- **`/helixir:how-to-use`** — Static reference guide. Setup steps, configuration options, architecture diagram, and troubleshooting. Use on first install or when you need to look something up.
 
 ## Quick start
 
@@ -52,9 +55,10 @@ No conflicts — each has its own config, templates, runs/, and state.
 
 | Skill | Purpose |
 |-------|---------|
+| `/helixir:whats-next` | Dynamic advisor — reads live project state and recommends what to do next. |
 | `/helixir:init-agent-skills` | Install prerequisites (flow-next, gstack). Once per machine. |
 | `/helixir:setup-ralph-script` | Create a ralph script for a specific epic. Per epic. |
-| `/how-to-use` | Full usage guide, config reference, troubleshooting. |
+| `/helixir:how-to-use` | Static reference — setup guide, config options, architecture, troubleshooting. |
 
 ## Prerequisites
 

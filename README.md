@@ -10,6 +10,8 @@ Claude Code plugins built by [Helixir Labs](https://helixirlabs.com) for autonom
 | [personal-knowledge-assistant](plugins/personal-knowledge-assistant/) | 0.2.0 | Agent-native PKM with ADHD-friendly planning, inbox triage, and scheduled reviews |
 | [xcode-native-toolkit](plugins/xcode-native-toolkit/) | 1.0.0 | Native iOS/macOS UI verification pipeline — SwiftUI previews, simulator testing, and systematic QA |
 
+> **Don't know where to start?** Run `/helixir:whats-next` in any project. It reads your epic/task state and tells you exactly what to do next — which reviews to run, whether to use ralph, and what you can skip.
+
 ---
 
 ## helixir-ralph-workflow
@@ -172,10 +174,10 @@ scripts/ralph-fn-2-dashboard-redesign/ralph.sh
 
 | Skill | Description |
 |-------|-------------|
-| `/helixir:whats-next` | Intelligent next-step advisor — reads epic state, scale, and review history, then suggests the best skills to run next. Start here if you're unsure. |
+| `/helixir:whats-next` | **Dynamic advisor** — reads your live epic/task state, assesses scale, checks what reviews have run, and recommends the best next skills. Use when you're mid-project, returning after a break, or unsure what stage you're at. |
+| `/helixir:how-to-use` | **Static reference** — setup steps, configuration options, architecture diagram, and troubleshooting. Use on first install or to look something up. |
 | `/helixir:init-agent-skills` | Install flow-next + gstack prerequisites. Run once per machine. |
 | `/helixir:setup-ralph-script` | Create a ralph script for a specific epic. Safe to re-run. |
-| `/helixir:how-to-use` | Show usage instructions and workflow overview. |
 
 ### gstack skills — the full development lifecycle
 
