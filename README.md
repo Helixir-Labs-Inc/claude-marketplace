@@ -172,6 +172,7 @@ scripts/ralph-fn-2-dashboard-redesign/ralph.sh
 
 | Skill | Description |
 |-------|-------------|
+| `/helixir:whats-next` | Intelligent next-step advisor — reads epic state, scale, and review history, then suggests the best skills to run next. Start here if you're unsure. |
 | `/helixir:init-agent-skills` | Install flow-next + gstack prerequisites. Run once per machine. |
 | `/helixir:setup-ralph-script` | Create a ralph script for a specific epic. Safe to re-run. |
 | `/helixir:how-to-use` | Show usage instructions and workflow overview. |
