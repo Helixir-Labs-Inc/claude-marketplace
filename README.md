@@ -52,11 +52,26 @@ Use flow-next to create a structured plan from a feature request:
 
 This researches your codebase, creates an epic (e.g., `fn-1-add-oauth`), and generates individual task files in `.flow/` with specs, acceptance criteria, and dependency ordering.
 
-Review the plan:
+Review the plan — pick the review that matches what you're building:
+
 ```
-/flow-next:plan-review    # Carmack-level architectural review
-/flow-next                # Quick list of all tasks and statuses
+/flow-next:plan-review       # Carmack-level architectural review (flow-next built-in)
+/autoplan                    # Full auto-review: runs CEO → design → eng → DX sequentially
+/plan-ceo-review             # Rethink the problem — find the 10-star product hiding in the request
+/plan-eng-review             # Lock in architecture, data flow, edge cases, and test plan
+/plan-design-review          # Rate each design dimension 0-10, then fix the plan to hit 10s
+/plan-devex-review           # Developer experience audit — personas, TTHW benchmarks, friction points
+/flow-next                   # Quick list of all tasks and statuses
 ```
+
+**Which review should you use?**
+
+| Building for... | Plan review (before code) | Live audit (after shipping) |
+|----------------|--------------------------|----------------------------|
+| End users (UI, web app, mobile) | `/plan-design-review` | `/design-review` |
+| Developers (API, CLI, SDK, docs) | `/plan-devex-review` | `/devex-review` |
+| Architecture (data flow, perf, tests) | `/plan-eng-review` | `/review` |
+| All of the above | `/autoplan` | — |
 
 Optionally refine requirements interactively:
 ```
@@ -161,6 +176,72 @@ scripts/ralph-fn-2-dashboard-redesign/ralph.sh
 | `/helixir:setup-ralph-script` | Create a ralph script for a specific epic. Safe to re-run. |
 | `/helixir:how-to-use` | Show usage instructions and workflow overview. |
 
+### gstack skills — the full development lifecycle
+
+gstack ([github.com/garrytan/gstack](https://github.com/garrytan/gstack)) provides specialist skills for every stage of development. Each skill feeds into the next — outputs from one become inputs to the next. Ralph automates this pipeline, but you can also run any skill manually.
+
+**Think → Plan → Build → Review → Test → Ship → Reflect**
+
+#### Think — Frame the problem before writing code
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/office-hours` | YC Office Hours | Six forcing questions that reframe your product. Challenges premises, generates alternatives. Outputs a design doc that feeds into every downstream review. |
+| `/design-consultation` | Design Partner | Build a complete design system from scratch. Researches the landscape, proposes creative risks, generates realistic product mockups. |
+| `/design-shotgun` | Design Explorer | Generates 4-6 AI mockup variants, opens a comparison board in your browser, collects feedback, and iterates until you love something. |
+
+#### Plan — Review and lock in the approach
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/plan-ceo-review` | CEO / Founder | Rethink the problem. Find the 10-star product. Four modes: Expansion, Selective Expansion, Hold Scope, Reduction. |
+| `/plan-eng-review` | Eng Manager | Lock in architecture, data flow, edge cases, and test plan. Forces hidden assumptions into the open. |
+| `/plan-design-review` | Senior Designer | Rates each design dimension 0-10, explains what a 10 looks like, then edits the plan to get there. AI Slop detection. |
+| `/plan-devex-review` | DX Lead | Explores developer personas, benchmarks against competitors, designs your magical moment, traces friction points. 20-45 forcing questions. |
+| `/autoplan` | Review Pipeline | One command — runs CEO → design → eng → DX review sequentially with encoded decision principles. Surfaces only taste decisions for your approval. |
+
+#### Build — Implement with quality gates
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/design-html` | Design Engineer | Turn a mockup into production HTML. Pretext computed layout, 30KB, zero deps. Detects React/Svelte/Vue. Output is shippable, not a demo. |
+| `/browse` | QA Engineer | Real Chromium browser — real clicks, real screenshots, ~100ms per command. |
+| `/pair-agent` | Multi-Agent Coordinator | Share your browser with any AI agent. One command, one paste, connected. Works with OpenClaw, Hermes, Codex, Cursor. |
+
+#### Review — Catch bugs before they ship
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/review` | Staff Engineer | Find bugs that pass CI but blow up in production. Auto-fixes the obvious ones. Flags completeness gaps. |
+| `/investigate` | Debugger | Systematic root-cause debugging. Iron Law: no fixes without investigation. Stops after 3 failed fixes. |
+| `/design-review` | Designer Who Codes | Visual quality audit — finds inconsistency, spacing issues, hierarchy problems, AI slop patterns. Fixes with atomic commits and before/after screenshots. |
+| `/devex-review` | DX Tester | Live developer experience audit. Actually tests your onboarding: navigates docs, tries getting started, times TTHW. Compares against `/plan-devex-review` scores. |
+| `/cso` | Chief Security Officer | OWASP Top 10 + STRIDE threat model. 17 false positive exclusions, 8/10+ confidence gate. Each finding includes a concrete exploit scenario. |
+
+#### Test — Verify everything works
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/qa` | QA Lead | Test your app, find bugs, fix them with atomic commits, re-verify. Auto-generates regression tests for every fix. |
+| `/qa-only` | QA Reporter | Same methodology as `/qa` but report only — pure bug report without code changes. |
+| `/benchmark` | Performance Engineer | Baseline page load times, Core Web Vitals, and resource sizes. Compare before/after on every PR. |
+
+#### Ship — Get it to production
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/ship` | Release Engineer | Sync main, run tests, audit coverage, push, open PR. Bootstraps test frameworks if needed. |
+| `/land-and-deploy` | Release Engineer | Merge the PR, wait for CI and deploy, verify production health. One command from "approved" to "verified in production." |
+| `/canary` | SRE | Post-deploy monitoring loop. Watches for console errors, performance regressions, and page failures. |
+| `/document-release` | Technical Writer | Update all project docs to match what shipped. Catches stale READMEs automatically. |
+
+#### Reflect — Learn and improve
+
+| Skill | Specialist | What it does |
+|-------|-----------|-------------|
+| `/retro` | Eng Manager | Team-aware weekly retro. Per-person breakdowns, shipping streaks, test health trends. `/retro global` runs across all projects and AI tools. |
+| `/learn` | Memory | Manage what gstack learned across sessions. Learnings compound so the agent gets smarter on your codebase over time. |
+
 ### Quick start (end to end)
 
 ```bash
@@ -175,8 +256,10 @@ claude /install-plugin helixir-labs-inc:helixir-ralph-workflow
 # 3. Plan your work
 /flow-next:plan <describe your feature>
 
-# 4. Review the plan
-/flow-next:plan-review
+# 4. Review the plan (pick one or more)
+/flow-next:plan-review        # Quick architectural review
+/autoplan                     # Full auto-review (CEO → design → eng → DX)
+/plan-eng-review              # Deep engineering review
 
 # 5. Generate the ralph script
 /helixir:setup-ralph-script fn-1-your-epic-slug
