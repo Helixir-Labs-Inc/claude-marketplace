@@ -210,7 +210,7 @@ Write receipt for the primary assigned task:
 mkdir -p "$(dirname '{{REVIEW_RECEIPT_PATH}}')"
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 cat > '{{REVIEW_RECEIPT_PATH}}' <<EOF
-{"type":"impl_review","id":"{{TASK_ID}}","mode":"{{WORK_REVIEW}}","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
+{"type":"impl_review","id":"{{TASK_ID}}","mode":"{{WORK_REVIEW}}","verdict":"SHIP","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
 EOF
 echo "Receipt written: {{REVIEW_RECEIPT_PATH}}"
 ```
@@ -219,11 +219,11 @@ For each parallel task that completed the FULL Worker Pipeline (W1–W6), also w
 ```bash
 RECEIPT_DIR="$(dirname '{{REVIEW_RECEIPT_PATH}}')"
 cat > "$RECEIPT_DIR/impl-<PARALLEL_TASK_ID>.json" <<EOF
-{"type":"impl_review","id":"<PARALLEL_TASK_ID>","mode":"{{WORK_REVIEW}}","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
+{"type":"impl_review","id":"<PARALLEL_TASK_ID>","mode":"{{WORK_REVIEW}}","verdict":"SHIP","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
 EOF
 ```
 
-**CRITICAL:** Only write receipts for tasks that completed ALL quality gates (W1–W6). Never write a receipt for a task that failed or was skipped.
+**CRITICAL:** Only write receipts for tasks that completed ALL quality gates (W1–W6). Never write a receipt for a task that failed or was skipped. ALL fields in the JSON above (`type`, `id`, `mode`, `verdict`, `timestamp`, `iteration`) are REQUIRED — `verify_receipt` rejects any receipt missing a field, which resets the task to `todo` and forces a retry. `verdict` is always `"SHIP"` here because reaching Step 5 means every quality gate passed (if any had failed, the task would have been reset and the worker would have stopped).
 
 ## Step 6: Validate epic
 

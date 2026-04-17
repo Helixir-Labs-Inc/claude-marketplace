@@ -30,7 +30,7 @@
     {
       "name": "helixir-ralph-workflow",
       "description": "Coordinated ralph workflow integrating flow-next task management with gstack quality gates. Patches default ralph templates for receipt-gated quality checks, two-pass task validation, and design review integration.",
-      "version": "1.0.0",
+      "version": "2.2.1",
       "author": {
         "name": "Aric Crosson Bouwers",
         "url": "https://github.com/ariccb"

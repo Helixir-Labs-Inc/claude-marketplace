@@ -246,12 +246,12 @@ For rp mode:
 mkdir -p "$(dirname '{{REVIEW_RECEIPT_PATH}}')"
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 cat > '{{REVIEW_RECEIPT_PATH}}' <<EOF
-{"type":"completion_review","id":"{{EPIC_ID}}","mode":"{{COMPLETION_REVIEW}}","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
+{"type":"completion_review","id":"{{EPIC_ID}}","mode":"{{COMPLETION_REVIEW}}","verdict":"SHIP","timestamp":"$ts","iteration":{{RALPH_ITERATION}}}
 EOF
 ```
 For codex mode, receipt is written automatically by `flowctl codex completion-review --receipt`.
 
-**CRITICAL:** The `"id":"{{EPIC_ID}}"` field is REQUIRED. Missing id = verification fails = forced retry.
+**CRITICAL:** ALL fields in the JSON above (`type`, `id`, `mode`, `verdict`, `timestamp`, `iteration`) are REQUIRED. Missing any field = `verify_receipt` rejects the file = completion review resets = forced retry. `verdict` must be `"SHIP"` here — if the epic review returned NEEDS_WORK or MAJOR_RETHINK, the skill would have looped until SHIP before reaching this step.
 
 ## Step 12: Finalize
 
