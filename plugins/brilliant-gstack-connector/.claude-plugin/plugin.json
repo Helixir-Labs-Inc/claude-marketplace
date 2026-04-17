@@ -1,0 +1,20 @@
+{
+  "name": "brilliant-gstack-connector",
+  "version": "0.0.1",
+  "description": "[WIP scaffold — skill body not implemented] Placeholder plugin intended to bridge the GStack design skills (/design-consultation, /design-shotgun, /design-html) into Brilliant via its MCP. Registered early so the author can iterate against live MCP tools. The /design-brilliant skill is currently a stub; installing this plugin today does not produce working behavior.",
+  "author": {
+    "name": "Aric Crosson Bouwers",
+    "url": "https://github.com/ariccb"
+  },
+  "repository": "https://github.com/Helixir-Labs-Inc/claude-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "brilliant",
+    "gstack",
+    "mcp",
+    "mockups",
+    "ui",
+    "connector"
+  ]
+}

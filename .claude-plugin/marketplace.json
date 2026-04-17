@@ -43,6 +43,25 @@
         "quality-gates"
       ],
       "source": "./plugins/helixir-ralph-workflow"
+    },
+    {
+      "name": "brilliant-gstack-connector",
+      "description": "[WIP scaffold — skill body not implemented] Placeholder plugin intended to bridge the GStack design skills into Brilliant. Registered early so the author can develop against the Brilliant MCP. Not ready for installation by end users; the /design-brilliant skill is currently a stub and will no-op until the body is written.",
+      "version": "0.0.1",
+      "author": {
+        "name": "Aric Crosson Bouwers",
+        "url": "https://github.com/ariccb"
+      },
+      "tags": [
+        "claude-code",
+        "plugin",
+        "design",
+        "brilliant",
+        "gstack",
+        "mcp",
+        "mockups"
+      ],
+      "source": "./plugins/brilliant-gstack-connector"
     }
   ]
 }
