@@ -46,8 +46,8 @@
     },
     {
       "name": "brilliant-gstack-connector",
-      "description": "[WIP scaffold — skill body not implemented] Placeholder plugin intended to bridge the GStack design skills into Brilliant. Registered early so the author can develop against the Brilliant MCP. Not ready for installation by end users; the /design-brilliant skill is currently a stub and will no-op until the body is written.",
-      "version": "0.0.1",
+      "description": "Bridges GStack design output (and arbitrary HTML / descriptions) into Brilliant via the Brilliant MCP. The /design-brilliant skill ports a finalized HTML file, a free-form description, or an auto-detected GStack finalized.html onto a live Brilliant canvas, exports a PNG preview, and appends a dated changelog entry under design/Reviews/. Requires the Brilliant desktop app and a design/ folder Brilliant has opened.",
+      "version": "0.1.0",
       "author": {
         "name": "Aric Crosson Bouwers",
         "url": "https://github.com/ariccb"
