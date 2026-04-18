@@ -1,6 +1,6 @@
 ---
 name: design-brilliant
-version: 0.1.0
+version: 0.1.1
 description: >-
   Port an approved GStack design (or any HTML / free-form description) onto a
   live Brilliant canvas via the Brilliant MCP. Accepts a path to a finalized
@@ -120,28 +120,139 @@ TARGET: <design dir>  (canvas: <canvasId>)
 external scripts, load remote stylesheets, or execute JS (no Pretext, no
 Google Fonts fetch on the canvas side). You must flatten to static markup.
 
-Transform rules:
+### Constraints applied to every payload (required)
 
-- If source is a GStack `finalized.html` (Pretext-heavy):
+Without explicit width and overflow rules, Brilliant renders the root
+element at an unbounded width and long text spills off the visible frame
+on the canvas. The v0.1.0 first-run symptom — hero extending past the
+right edge, card text truncated like `"Elements land on Canvas.design
+via the Brilliant M…"` — was entirely a missing-constraint problem, not
+an MCP bug.
+
+Prepend this style block and wrap the body content in a `.dbc-canvas-frame`
+div on every payload. The `dbc-` prefix is this skill's namespace and
+should not collide with source styles.
+
+```html
+<style>
+  .dbc-canvas-frame {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px;
+    box-sizing: border-box;
+    font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+  }
+  .dbc-canvas-frame *,
+  .dbc-canvas-frame *::before,
+  .dbc-canvas-frame *::after {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
+  }
+  .dbc-canvas-frame img,
+  .dbc-canvas-frame svg,
+  .dbc-canvas-frame video {
+    max-width: 100%;
+    height: auto;
+  }
+  .dbc-canvas-frame pre,
+  .dbc-canvas-frame code {
+    white-space: pre-wrap;
+  }
+</style>
+<div class="dbc-canvas-frame">
+  <!-- transformed source content goes here -->
+</div>
+```
+
+Rationale for each rule:
+- `max-width: 1200px; margin: 0 auto` — the canvas frame has a definite
+  width; Brilliant measures the root element to decide frame size.
+- `min-width: 0` on every descendant — flex/grid children default to
+  `min-width: auto`, which causes overflow rather than wrap.
+- `overflow-wrap: anywhere` — long URLs, long dashes, and unbroken strings
+  wrap instead of pushing the column wider.
+- Media capped at `max-width: 100%` — an oversized image can't push the
+  frame wider than its container.
+
+### Transform rules
+
+- **If source is a GStack `finalized.html`** (Pretext-heavy):
   - Strip `<script>` blocks, Pretext imports, ResizeObserver wiring,
     `contenteditable` handlers.
   - Inline computed styles where possible, or keep `<style>` blocks at the
     top of the body.
   - Keep semantic structure (`<header>`, `<section>`, `<footer>` etc.) —
     Brilliant preserves layout intent.
-  - If the file uses Google Fonts, replace with a reasonable system font
-    stack (`-apple-system, system-ui, sans-serif`), or keep the font-family
-    name — Brilliant will substitute.
-- If source is a free-form description:
-  - Draft compact, semantic HTML with inline CSS. Match the described
-    structure (hero, three cards, nav, etc.). Use real content from the
-    description — never "Lorem ipsum".
-  - Keep total payload under ~15KB where practical; Brilliant handles
-    larger but the canvas gets noisy.
+  - If the file uses Google Fonts, replace with a system font stack
+    (`-apple-system, system-ui, sans-serif`), or keep the font-family name —
+    Brilliant will substitute.
+  - **Wrap whatever remains in the `.dbc-canvas-frame` div above.** Do
+    not skip this step even if the source already has its own outer
+    container — nested wrappers are fine; an unbounded root is not.
+- **If source is a free-form description**: use the scaffold below. It
+  already includes the canvas frame and opinionated defaults that produce
+  a clean first drop on the canvas.
+
+### Free-form description scaffold
+
+Fill in real content from the description. Never "Lorem ipsum". Keep total
+payload under ~15KB where practical.
+
+```html
+<style>
+  .dbc-canvas-frame { /* as defined above — do not omit */ }
+  .dbc-hero { padding: 80px 0 48px; }
+  .dbc-eyebrow { font: 600 14px/1 -apple-system, system-ui, sans-serif;
+                 color: #64748b; letter-spacing: 0.06em;
+                 text-transform: uppercase; margin: 0 0 16px; }
+  .dbc-h1 { font: 700 56px/1.1 -apple-system, system-ui, sans-serif;
+            margin: 0 0 16px; color: #0f172a; }
+  .dbc-lead { font: 400 18px/1.5 -apple-system, system-ui, sans-serif;
+              color: #475569; max-width: 640px; margin: 0 0 32px; }
+  .dbc-cta-row { display: flex; gap: 12px; align-items: center;
+                 flex-wrap: wrap; }
+  .dbc-cta { display: inline-block; padding: 12px 20px; border-radius: 8px;
+             font: 600 15px/1 -apple-system, system-ui, sans-serif;
+             text-decoration: none; background: #10b981; color: #052e1a; }
+  .dbc-cta-ghost { background: transparent; color: #0f172a; }
+  .dbc-grid { display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+              gap: 24px; margin: 48px 0 0; }
+  .dbc-card { background: #0f172a; color: #e2e8f0; padding: 24px;
+              border-radius: 12px; }
+  .dbc-card h3 { font: 600 16px/1.3 -apple-system, system-ui, sans-serif;
+                 margin: 0 0 8px; color: #f8fafc; }
+  .dbc-card p { font: 400 14px/1.5 -apple-system, system-ui, sans-serif;
+                margin: 0; color: #94a3b8; }
+</style>
+<div class="dbc-canvas-frame">
+  <section class="dbc-hero">
+    <p class="dbc-eyebrow"><!-- category / kicker --></p>
+    <h1 class="dbc-h1"><!-- headline --></h1>
+    <p class="dbc-lead"><!-- 1-2 sentence lead --></p>
+    <div class="dbc-cta-row">
+      <a class="dbc-cta" href="#"><!-- primary CTA --></a>
+      <a class="dbc-cta dbc-cta-ghost" href="#"><!-- secondary CTA --></a>
+    </div>
+  </section>
+  <!-- Optional grid of cards, feature rows, etc. Remove if not described. -->
+</div>
+```
+
+Omit sections the description doesn't mention — no hero, remove the hero
+block. No cards, remove the grid. Empty scaffold sections render as empty
+blocks on the canvas and look broken.
+
+### Splitting payloads
 
 You may split one page into multiple `create_html` calls if the design has
 distinct sections (e.g. nav, hero, features) and you want each as its own
-frame group on the canvas. One call per invocation is the default.
+frame group on the canvas. If you do split, each call's payload must carry
+its own `.dbc-canvas-frame` wrapper — the constraints are per-payload.
+One call per invocation is still the default.
 
 ---
 
@@ -188,6 +299,19 @@ If `create_html` returns an error (not a timeout):
    `landing-hero`, `dashboard-v2`). Create the `Reviews/` directory first
    with `mkdir -p` if missing.
 3. Show the preview PNG inline (Read tool on the output path).
+4. **Overflow check.** Inspect the root element's bounding box width from
+   `get_blueprint`. If it exceeds 1400 px (the frame's 1200 px + a 200 px
+   safety margin), the constraints in Step 2 were bypassed or the source
+   has inline `width:` declarations that escape the wrapper. Add a warning
+   to the summary block (Step 6):
+
+   > `WARNING: rendered width <W>px exceeds the 1200px canvas frame.`
+   > `Content may be clipped in the preview PNG. The elements are on the`
+   > `canvas and viewable in Brilliant — iterate the source or re-run`
+   > `with a tighter description.`
+
+   Do not fail and do not delete elements — the landing succeeded; this
+   is a hint to iterate, not a hard error.
 
 ---
 

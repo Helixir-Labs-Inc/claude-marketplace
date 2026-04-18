@@ -1,6 +1,6 @@
 {
   "name": "brilliant-gstack-connector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bridges GStack design output (and arbitrary HTML / descriptions) into Brilliant via the Brilliant MCP. The /design-brilliant skill takes a finalized HTML file, a free-form description, or an auto-detected ~/.gstack/projects/<slug>/designs/**/finalized.html and lands it on a live Brilliant canvas, exports a PNG preview, and appends a dated changelog entry under design/Reviews/. Requires the Brilliant desktop app running locally (127.0.0.1:3333) and a design/ folder Brilliant has opened at least once.",
   "author": {
     "name": "Aric Crosson Bouwers",
