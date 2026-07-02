@@ -113,7 +113,7 @@ Highlight: [single best thing that happened this week]
 
 ## Step 4: Update Journal
 
-Create a weekly summary entry in the Personal workspace: `~/Documents/Personal Documents/02 Areas/Journal/YYYY/MM/YYYY-MM-DD-weekly.md`
+Create a weekly summary entry in the Personal vault: `~/Notes/Personal/Daily/YYYY/MM/YYYY-MM-DD-weekly.md`
 
 ```yaml
 ---

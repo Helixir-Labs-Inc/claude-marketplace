@@ -126,7 +126,9 @@ Ask:
 ```
 Where should your PKA folder live? (default: ~/pka/)
 
-This is where all your notes, journals, and project docs go. It's a git repo — you can clone it to other devices.
+This is the CONTRACT repo only — agent instructions, path map, templates. Your notes live in per-domain
+notes vaults (default: ~/Notes/<Domain>, a symlink into Obsidian's iCloud container), and your files live
+in per-domain file workspaces (~/Documents/<Domain> Documents or a cloud drive). Notes never mix with files.
 ```
 
 ### Step 8: Confirm & Scaffold
@@ -137,10 +139,12 @@ Here's what I'll set up:
 
 📁 PKA Location: ~/pka/
 
-Domains:
-  - personal/ → files at ~/Documents/Personal/ (iCloud)
-  - [company]/ → files at [Google Drive path]
-  - [employer]/ → files at [path]
+Domains (notes vault + file workspace per domain):
+  - Personal → notes at ~/Notes/Personal/, files at ~/Documents/Personal Documents/ (iCloud)
+  - [company] → notes at ~/Notes/[Company]/, files at [Google Drive path]
+  - [employer] → notes at ~/Notes/[Employer]/, files at ~/Documents/[Employer] Documents/
+
+Capture inboxes: ~/Documents/Inbox - [Domain]/ (one per domain)
 
 Email accounts:
   - personal@gmail.com → personal domain
@@ -171,14 +175,11 @@ On confirmation, create the full structure (session logging is set up first, the
    Route: project work → ~/_git/[repo], personal knowledge → ~/pka/, session logs → ~/.claude/logs/
    ```
    (Use the full router template from the plugin — see below)
-3. **Create PKA directory** at chosen location
+3. **Create PKA directory** at chosen location (contract repo only — no notes, no files)
 4. **Initialize git repo** with `.gitignore`
-5. **Create domain folders** with area docs for each domain:
-   - For personal: health.md, finance.md, family.md, learning/, career/, journal/, notes/, projects/, meetings/
-   - For work domains: notes/, projects/, meetings/, plus any sub-areas they specified
-   - Area docs (`.md` at domain root) include a `Files:` reference to the storage mirror path
-6. **Create inbox folders** (gitignored): inbox/inbox-personal/, inbox/inbox-[domain]/, etc.
-7. **Create shared folders**: templates/, meta/
+5. **Create the notes vaults** — one per domain in the Obsidian iCloud container (`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/<Domain>`), plus a `~/Notes` symlink to the container. Sections per vault: `Inbox, Daily, Projects, Areas, Meetings, People, Reference, Decisions, Templates, Archive` (plain names, no numbers)
+6. **Create the file workspaces** — one per domain (`~/Documents/<Domain> Documents/` or the cloud-drive root), each with plain-named PARA: `Projects/ Areas/ Resources/ Archive/`
+7. **Create the capture inboxes**: `~/Documents/Inbox - <Domain>/` for each domain; plus shared repo folders: templates/, meta/
 8. **Write CLAUDE.md** with (include ONLY enabled integrations):
    - Domain structure and routing rules
    - File storage mapping (domain → path)

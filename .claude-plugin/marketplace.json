@@ -11,8 +11,8 @@
   "plugins": [
     {
       "name": "personal-knowledge-assistant",
-      "description": "Agent-native PKM with interactive setup, ADHD-friendly planning (top-3 batching), inbox triage, daily/weekly reviews, and domain-based organization. Includes 6 skills and 2 agents.",
-      "version": "0.1.0",
+      "description": "Agent-native PKM: notes/files separation (per-domain Obsidian vaults + plain-PARA file workspaces), capture inboxes, ADHD-friendly top-3 planning, inbox triage with naming/tags/Spotlight, daily/weekly reviews, session logging. 7 skills, 2 agents, hooks. Reads the ~/pka contract repo.",
+      "version": "0.3.0",
       "author": {
         "name": "Aric Crosson Bouwers",
         "url": "https://github.com/ariccb"

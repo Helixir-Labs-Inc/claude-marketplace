@@ -16,11 +16,11 @@ Read the CLAUDE.md in the PKA root to understand domains and schedule config.
 - Check Linear for issues updated today (if available)
 - Check today's calendar events (what meetings happened)
 - Check Gmail for sent messages today (what was communicated)
-- Check inbox folders — anything still pending?
+- Check the capture inboxes (`~/Documents/Inbox - */`) — anything still pending?
 
 **PKM Changes:**
-- Check `git -C <pka-root> diff --stat` for notes modified today
-- Check for any new files in domain folders
+- Check for notes created/modified today across the three vaults (`find ~/Notes/*/ -name '*.md' -mtime -1`)
+- Check for new files in the workspace `Projects/` folders
 
 ## Step 2: Present the Review
 

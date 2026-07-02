@@ -1,196 +1,102 @@
 ---
 name: triage-inbox
-description: "Process files in inbox folders — rename, tag, and move to proper file storage. Also handles Downloads folder. Use when: 'triage inbox', 'organize inbox', 'process files', 'clean inbox', 'file these', 'organize downloads'. Can run on-demand or as a loop."
+description: "Process files in the ~/Documents inbox folders — rename, tag, and file into the correct workspace or notes vault. Also handles Downloads. Use when: 'triage inbox', 'organize inbox', 'process files', 'clean inbox', 'file these', 'organize downloads'. Can run on-demand or as a loop."
 ---
 
-# Inbox Triage — File Organization
+# Inbox Triage — File & Note Organization
 
-Read the CLAUDE.md in the PKA root for:
-- Domain → file storage path mapping (and `meta/file-locations.md` for full path map)
-- Naming convention rules (from global CLAUDE.md / AGENTS.md)
-- Finder tag rules
+Read `~/pka/CLAUDE.md` first — it is the contract (locations, routing rules, naming, tags). `~/pka/meta/file-locations.md` has the full path map. Core rule: **`~/Documents` = files, `~/Notes` = markdown vaults.**
 
 ---
 
-## Step 1: Scan All Inboxes
+## Step 1: Scan the capture points
 
-Check these locations for files:
-- `<pka-root>/inbox/inbox-<domain>/` for each domain listed in CLAUDE.md
+- `~/Documents/Inbox - Personal/`
+- `~/Documents/Inbox - Helixir/`
+- `~/Documents/Inbox - Webvar/`
 - `~/Downloads/` — only files modified in the last 24 hours
 
-List what's found. If nothing: "All inboxes clear." and stop.
+These are the ONLY inboxes. List what's found. If nothing: "All inboxes clear." and stop.
 
----
+## Step 2: Classify each item
 
-## Step 2: Classify Each File
+1. **Domain** — the inbox folder says it (`Inbox - Personal` → Personal). For Downloads, infer from content (read PDFs/images). Employment paperwork (TD1/T4/pay stub/ROE/offer letter, any employer) is ALWAYS Personal → `Areas/Career/Employment/<Employer>/`.
 
-For each file, determine all five fields:
+2. **Note or file?**
+   - Markdown knowledge (ideas, meeting notes, journal fragments) → the domain **vault**: `~/Notes/<Domain>/` (Inbox if unsorted, Daily for dated journal, Meetings, People, Reference…). Apply YAML frontmatter per the contract.
+   - Everything else (and `.md` that is really a *document*, e.g. exported contract) → the domain **file workspace**.
 
-1. **Domain** — which domain does it belong to?
-   - Inbox subfolder determines domain directly (`inbox-personal/` → personal)
-   - For Downloads, infer from content (read PDFs/images to determine)
-
-2. **Category** — use this decision tree:
+3. **Category** (files):
    | If the document is... | Category | Example |
    |----------------------|----------|---------|
    | Proof of purchase | `receipt` | pharmacy receipt, Amazon order |
-   | Bill sent to or from someone | `invoice` | freelance invoice, utility bill |
-   | Signed agreement, SOW, terms | `contract` | employment contract, NDA |
-   | Government tax form or filing | `tax` | T4, notice of assessment |
-   | Bank/credit card periodic summary | `statement` | TD chequing January statement |
-   | Employment verification, offer, termination | `legal` | employment letter, offer letter |
-   | Doctor/hospital/pharmacy record | `medical` | lab results, prescription record |
-   | Meeting record, memo, note | `note` | meeting minutes, brain dump |
-   | UI capture, error, visual reference | `screenshot` | Slack thread, dashboard state |
+   | Bill to/from someone | `invoice` | freelance invoice, utility bill |
+   | Signed agreement, SOW, terms | `contract` | NDA, engagement letter |
+   | Government tax form/filing | `tax` | T4, notice of assessment |
+   | Bank/card periodic summary | `statement` | BMO chequing January statement |
+   | Employment verification/offer/termination | `legal` | employment letter |
+   | Doctor/hospital/pharmacy record | `medical` | lab results, prescription |
+   | Meeting record, memo | `note` | meeting minutes (→ usually vault) |
+   | UI capture, error, visual reference | `screenshot` | dashboard state |
 
-3. **Target folder** — route using category + year:
+4. **Target folder** (files — plain PARA, no numbered folders ever):
+   - `receipt`/`invoice` → `<workspace>/Areas/Finance/Receipts/YYYY/` (or `Invoices/`)
+   - `statement` → `<workspace>/Areas/Finance/Statements/`
+   - `tax` → `<workspace>/Areas/Finance/Taxes/YYYY/` (never re-sort a year that has Return + NOA)
+   - `medical` → `Personal Documents/Areas/Health/YYYY/`
+   - `contract`/`legal` → `<workspace>/Areas/Legal/` (employment docs → Personal `Areas/Career/Employment/<Employer>/`)
+   - `screenshot` → relevant project folder under `<workspace>/Projects/`
+   - Employer-paid receipts (Wispr Flow, ChatGPT Pro, Anthropic Claude Max) → `Webvar Documents/Areas/Finance/Receipts/YYYY/`
+   - Use the **document date** for YYYY. Year folders auto-create; any other new folder needs user confirmation — scan 2 levels first, the right folder almost certainly exists.
 
-   Categories that use **year subfolders** (these accumulate over time):
-   - `receipt` → `<storage-root>/finance/YYYY/`
-   - `invoice` → `<storage-root>/finance/YYYY/`
-   - `statement` → `<storage-root>/finance/YYYY/`
-   - `tax` → `<storage-root>/finance/tax/YYYY/`
-   - `medical` → `<storage-root>/health/YYYY/`
+5. **New filename**: `YYYY-MM-DD_category_source_description[_amount].ext` — date from content; source lowercase-hyphenated (`shoppers-drug-mart`, `td-bank`); description 2–4 words; amount on receipts/invoices only.
 
-   Categories that use **flat folders** (few files, high importance):
-   - `contract` → `<storage-root>/legal/`
-   - `legal` → `<storage-root>/legal/` or `<storage-root>/career/` (employment docs)
-   - `note` → `<storage-root>/notes/` or relevant project folder
-   - `screenshot` → relevant project folder, or `<storage-root>/projects/`
+6. **Finder tags** (all that match): `Medical`, `Childcare`, `Home Office`, `Tax Claimable` (personally deductible), `Corporate Expense` (Helixir), `Reimbursable` (client-billable).
 
-   Use the document date for YYYY, not today's date. Create year folders on demand.
+## Step 3: Dedup check
 
-4. **New filename** — apply naming convention:
-   ```
-   YYYY-MM-DD_category_source_description[_amount].ext
-   ```
-   - **Date**: from document content, not file modification time
-   - **Source**: lowercase, hyphens for spaces (e.g., `shoppers-drug-mart`, `td-bank`, `max-technologies`)
-   - **Description**: 2-4 words, lowercase, hyphens. Specific enough to distinguish from similar docs
-   - **Amount**: include on receipts/invoices, omit on everything else
+Before filing, check the target for an existing file with the same date + source + category. If found: compare content (hash); identical → skip and report; different → ask (replace / keep both with `_v2` / skip).
 
-5. **Finder tags** — apply all that match:
-   | Tag | When |
-   |-----|------|
-   | `Medical` | Any health-related document |
-   | `Childcare` | Childcare expenses |
-   | `Home Office` | Home office deductions (T2125) |
-   | `Tax Claimable` | Any personally tax-deductible item |
-   | `Corporate Expense` | Helixir Labs business expense |
-   | `Reimbursable` | Client-billable expense |
+## Step 4: Present plan
 
-**Content extraction:**
-- For PDFs: read the file to extract date, vendor/source, amount, and purpose
-- For screenshots: read the image to determine what it shows and which project it relates to
-- For unknown files: ask the user
-
----
-
-## Step 3: Dedup Check
-
-Before presenting the plan, check the target folder for existing files with the same date + source + category pattern. If a potential duplicate exists:
-- Show both filenames and ask: "This looks similar to an existing file — replace, keep both, or skip?"
-- To keep both, append a sequence suffix: `..._v2.pdf`
-
----
-
-## Step 4: Present Plan
-
-Show the triage plan BEFORE executing, grouped by domain:
-
-```
-### Inbox Triage
-
-**Personal**
-| File | → New Name | → Destination | Tags |
-|------|-----------|---------------|------|
-| receipt.pdf | 2026-03-26_receipt_pharmacy_rx_45.50.pdf | ~/Documents/Personal/finance/2026/ | Medical, Tax Claimable |
-
-**Helixir**
-| File | → New Name | → Destination | Tags |
-|------|-----------|---------------|------|
-| invoice.pdf | 2026-03-26_invoice_collegium_march.pdf | .../Helixir Labs/finance/2026/ | Corporate Expense |
-
-Proceed? (yes/no/edit)
-```
-
----
+Show the triage plan BEFORE executing, grouped by domain — table of: current name → new name → destination → tags. Proceed on confirmation. (Loop mode: auto-execute obvious receipts/invoices, queue ambiguous ones.)
 
 ## Step 5: Execute
 
-On confirmation, for each file:
-
-1. **Create target folder** if needed (year folders are fine to auto-create; ask first for any new top-level category folder)
-2. **Move + rename** the file in one operation
-3. **Apply Finder tags**: `tag -a "Tag Name" "file path"`
-4. **Set Spotlight comment** with searchable keywords:
-   ```bash
-   xattr -w com.apple.metadata:kMDItemComment "original: <original-filename> | <extracted-keywords>" "<new-filepath>"
-   ```
-   Keywords should include: vendor name, document type, purpose, amount — whatever was extracted from the content. This makes `mdfind` searches work across all filed documents.
-5. **Verify** the file exists at the destination (quick `ls` check)
-6. If the file warrants a PKM note (contract, important receipt, employment letter), offer to create one in the appropriate domain
-
----
+1. Move + rename in one operation (never delete the original — it moves).
+2. `tag -a "Tag Name" "<filepath>"` for each tag.
+3. Spotlight comment: `xattr -w com.apple.metadata:kMDItemComment "original: <original-filename> | <keywords>" "<filepath>"` (vendor, type, purpose, amount) so `mdfind` finds it.
+4. Verify the file exists at the destination.
+5. If it warrants a note (contract, key receipt), offer to create one in the domain vault with a `File:` absolute-path reference.
 
 ## Step 6: Report
 
 ```
-Triaged X files:
-- X → personal/finance/2026/
-- X → helixir/finance/2026/
-- X skipped (need clarification)
+Triaged X items:
+- N → Personal Documents/Areas/Finance/Receipts/2026/
+- N → ~/Notes/Webvar/Meetings/
+- N skipped (need clarification)
 ```
 
----
+## Finding filed documents later
 
-## Finding Filed Documents Later
+1. Spotlight: `mdfind "kMDItemComment == '*<keyword>*'" -onlyin ~/Documents/`, `mdfind "kMDItemUserTags == 'Tax Claimable'" -onlyin ~/Documents/`
+2. Filename pattern: `find ~/Documents -name "*_receipt_*<vendor>*"`
+3. Notes: search the domain vault (`grep -ri <term> ~/Notes/<Domain>/`)
+Never search or file into `~/Library/Mobile Documents/com~apple~CloudDocs/Backups/` — that's the read-only archive (check its `_MANIFEST.md` only when explicitly hunting something old).
 
-When the user asks to find a previously filed document, use these strategies in order:
+## Special: Downloads
 
-1. **Spotlight search** (fastest, searches tags + comments + filenames):
-   ```bash
-   mdfind "kMDItemComment == '*employment*'" -onlyin ~/Documents/Personal/
-   mdfind "kMDItemUserTags == 'Medical'" -onlyin ~/Documents/Personal/
-   mdfind "kind:pdf name:receipt 2026" -onlyin ~/Documents/Personal/
-   ```
-
-2. **Filename pattern search** (when you know the category/source):
-   ```bash
-   find ~/Documents/Personal/ -name "*_receipt_*pharmacy*" -type f
-   find ~/Documents/Personal/ -name "2026-03*" -type f
-   ```
-
-3. **Tag search** (for browsing by classification):
-   ```bash
-   tag -f "Tax Claimable" ~/Documents/Personal/
-   mdfind "kMDItemUserTags == 'Corporate Expense'" -onlyin ~/path/
-   ```
-
----
-
-## Special: Downloads Folder
-
-For `~/Downloads/`:
-- Only look at files from the last 24 hours (don't reorganize old downloads)
-- Ignore: `.dmg`, `.pkg`, `.app`, `.zip` (software installs — leave them)
-- Process: `.pdf`, `.csv`, `.xlsx`, `.docx`, `.png`, `.jpg` (documents and screenshots)
-- Ask before moving anything from Downloads — it's a shared space
+Only files from the last 24h. Ignore `.dmg`/`.pkg`/`.app`/`.zip` installers. Ask before moving anything — it's a shared space.
 
 ## Special: Screenshots
 
-macOS screenshots can be read visually. When triaging a screenshot:
-1. Read the image to understand what it shows
-2. If it's clearly related to a project (shows a specific UI, error, or page): suggest filing it in that project's file storage
-3. If it's ambiguous: ask the user
-4. Apply descriptive naming: `YYYY-MM-DD_screenshot_[project]_[description].png`
+Read the image; if clearly project-related, file under that project with `YYYY-MM-DD_screenshot_<project>_<description>.png`; if ambiguous, ask.
 
----
+## Loop mode (`/loop 5m /triage-inbox`)
 
-## Loop Mode
+Run silently unless files are found. Auto-file obvious items (clear receipts/invoices), report a summary; batch questions for ambiguous items — never interrupt mid-task.
 
-When running as a loop (via `/loop 5m /triage-inbox`):
-- Run silently unless files are found
-- For obvious files (receipts, invoices with clear metadata): triage automatically, report summary
-- For ambiguous files: queue them and ask during the next user interaction
-- Never interrupt the user mid-task for triage — batch questions
+## Mercury receipts (email)
+
+Check Gmail for Mercury "requires a receipt" emails; find the matching vendor receipt email and forward to receipts@mercury.com.

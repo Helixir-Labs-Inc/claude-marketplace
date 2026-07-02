@@ -17,12 +17,10 @@ If the user says "add a task" or "what are my tasks" without mentioning "flow" o
 Do NOT narrate what you're gathering. Run all of these in parallel:
 
 **PKM State:**
-- Read the PKA root CLAUDE.md for domain structure and schedule config
-- Read project folders across ALL domains (check each `<domain>/projects/`)
-- Read area docs at each domain root (the `.md` files)
-- Read learning/career areas if they exist
-- Check most recent journal entry for continuity
-- Check inbox folders for pending files: `ls <pka-root>/inbox/*/`
+- Read `~/pka/CLAUDE.md` for structure and schedule config
+- Read recent notes across the three vaults (`~/Notes/Personal`, `~/Notes/Helixir`, `~/Notes/Webvar` — check `Projects/` and `Areas/`)
+- Check the most recent journal entry (`~/Notes/Personal/Daily/YYYY/MM/`) for continuity
+- Check the capture inboxes for pending files: `ls ~/Documents/Inbox\ -\ */`
 
 **Calendar & Email (MCP — use whatever accounts are configured):**
 - Google Calendar: list today's events across all calendars
@@ -88,7 +86,7 @@ Swap any? Or "go" to lock in.
 
 When user confirms ("go", "good", "yeah", "ok", "looks good", or accepts without changes):
 
-1. Create/update today's journal entry at `<pka>/personal/journal/YYYY/MM/YYYY-MM-DD.md`
+1. Create/update today's journal entry at `~/Notes/Personal/Daily/YYYY/MM/YYYY-MM-DD.md`
    - Use the journal-entry template if creating new
    - Add a `## Focus` section with the locked-in top 3
    - Add a `## Schedule` section with today's events
