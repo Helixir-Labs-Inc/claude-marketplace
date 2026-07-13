@@ -1,6 +1,6 @@
 {
   "name": "personal-knowledge-assistant",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Agent-native PKM: notes/files separation (per-domain Obsidian vaults + plain-PARA file workspaces), capture inboxes, ADHD-friendly top-3 planning, inbox triage with naming/tags/Spotlight, daily/weekly reviews, session logging. 7 skills, 2 agents, hooks. Reads the ~/pka contract repo.",
   "author": {
     "name": "Aric Crosson Bouwers",
